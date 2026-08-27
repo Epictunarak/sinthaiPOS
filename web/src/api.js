@@ -46,5 +46,6 @@ export const api = {
   getProducts: () => apiGet('products'),
   getReport: (dateStr) => apiGet('report', { date: dateStr }),
   createSale: (sale) => apiPost('createSale', sale),
-  adjustStock: (adjustment) => apiPost('adjustStock', adjustment)
+  adjustStock: (adjustment) => apiPost('adjustStock', adjustment),
+  setBarcode: (entry) => apiPost('setBarcode', entry)
 };

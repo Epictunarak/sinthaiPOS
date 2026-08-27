@@ -5,11 +5,13 @@ import { renderLogin } from './pages/login.js';
 import { renderPos } from './pages/pos.js';
 import { renderInventory } from './pages/inventory.js';
 import { renderReports } from './pages/reports.js';
+import { renderBarcodes } from './pages/barcodes.js';
 
 const ROUTES = {
   '#/pos': { render: renderPos, label: 'ขายของ' },
   '#/inventory': { render: renderInventory, label: 'สต็อก' },
-  '#/reports': { render: renderReports, label: 'รายงาน' }
+  '#/reports': { render: renderReports, label: 'รายงาน' },
+  '#/barcodes': { render: renderBarcodes, label: 'เก็บบาร์โค้ด' }
 };
 
 const app = document.getElementById('app');

@@ -266,6 +266,59 @@ VENDOR_COLUMNS = [
 ]
 
 
+def apply_barcode_captures(products):
+    """เติมบาร์โค้ดที่พนักงานยิงจากตัวสินค้าจริงผ่านหน้า "เก็บบาร์โค้ด" ในแอป
+
+    ทำไมต้องมีไฟล์นี้แยกจากชีต: ชีตต้นทางมีบาร์โค้ดแค่ 2 จาก 141 รายการ และการยิง
+    จากสินค้าจริงคือทางเดียวที่ได้บาร์โค้ดที่ถูกต้อง ถ้าไม่เก็บไว้ที่นี่ บาร์โค้ดที่
+    อุตส่าห์เดินยิงทั้งร้านจะหายทันทีที่ import รอบถัดไป เพราะ products_master.csv
+    ถูกสร้างใหม่จากชีตทุกครั้ง
+
+    ลำดับความสำคัญ: ถ้าชีตมีบาร์โค้ดอยู่แล้ว ให้ชีตชนะ (ถือว่าเจ้าของร้านตั้งใจแก้)
+    """
+    path = DATA / "barcode_captures.csv"
+    if not path.exists():
+        return 0, []
+
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        captures = {
+            clean(row["sku_code"]): clean(row["barcode"])
+            for row in csv.DictReader(f)
+            if clean(row.get("sku_code")) and clean(row.get("barcode"))
+        }
+    if not captures:
+        return 0, []
+
+    # บาร์โค้ดเดียวห้ามผูกกับสินค้าหลายตัว ไม่งั้นยิงขายแล้วไม่รู้ว่าตัวไหน และ
+    # unique index ในฐานข้อมูลจะไม่ยอมรับด้วย เจอซ้ำเมื่อไหร่ให้ "ข้ามทั้งคู่"
+    # ไม่ใช่เลือกมาตัวหนึ่ง เพราะเราไม่รู้ว่าอันไหนคือของจริง
+    owners = {}
+    for sku, barcode in captures.items():
+        owners.setdefault(barcode, []).append(sku)
+
+    conflicts = []
+    blocked = set()
+    for barcode, skus in owners.items():
+        if len(skus) > 1:
+            conflicts.append(f"{barcode} ถูกยิงให้ทั้ง {', '.join(sorted(skus))} — ข้ามทั้งหมด ต้องยิงใหม่")
+            blocked.update(skus)
+
+    applied = 0
+    for record in products:
+        barcode = captures.get(record["sku_code"])
+        if not barcode or record["barcode"] or record["sku_code"] in blocked:
+            continue
+        record["barcode"] = barcode
+        record["_flags"] = [f for f in record["_flags"] if f != "barcode_missing"]
+        record["_flags"].append("barcode_from_capture")
+        applied += 1
+
+    unknown = sorted(set(captures) - {p["sku_code"] for p in products})
+    if unknown:
+        conflicts.append(f"อ้างถึง SKU ที่ไม่มีในชีต: {', '.join(unknown)}")
+    return applied, conflicts
+
+
 def write_csv(path, columns, records):
     with open(path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=columns, extrasaction="ignore")
@@ -287,6 +340,8 @@ def main():
     products = assign_missing_skus(products, unassigned)
     products.sort(key=lambda r: r["sku_code"])
 
+    captured, capture_warnings = apply_barcode_captures(products)
+
     known = {p["sku_code"] for p in products}
     vendor_prices, skipped = load_vendor_prices(workbook, known)
     vendor_prices.sort(key=lambda r: (r["sku_code"], r["vendor"]))
@@ -307,7 +362,10 @@ def main():
 
     print(f"สินค้า               : {len(products)} รายการ")
     print(f"  ออกรหัส SKU ให้ใหม่ : {assigned} รายการ (เดิมไม่มีรหัส)")
+    print(f"  บาร์โค้ดจากการยิงจริง: {captured} รายการ")
     print(f"  ไม่มีบาร์โค้ด        : {no_barcode} รายการ")
+    for warning in capture_warnings:
+        print(f"  ⚠ บาร์โค้ดที่ยิงมา: {warning}")
     print(f"ราคาผู้ขาย            : {len(vendor_prices)} แถว")
     print(f"  เป็นค่าตัวอย่างเทมเพลต: {samples} แถว (ไม่นับเป็นต้นทุน)")
     print(f"  รู้ต้นทุนจริง         : {len(priced)} รายการ")
