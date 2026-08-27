@@ -1,16 +1,142 @@
-sku_code,legacy_sku_code,barcode,brand,product_name,category,subcategory,pack_size,pack_size_unit,pack_qty,pack_qty_source,retail_price,active,data_flags
-SKU0001,SKU001,8851959142011,Coca-Cola,Coke Original 325ml x 24 units,Beverage,Soft Drink,325,ml,24,product_name,325,TRUE,retail_price_equals_pack_size_verify
-SKU0002,SKU002,8850718801015,Lay's,Lay's Original 48g x 6 units,Snack,Potato Chips,48,g,6,product_name,100,TRUE,
-SKU0003,SKU0003,,SINGHA,SINGHA Drinking Water 1.5L Pack 6,Beverage,Drinking Water,1.5,L,6,product_name,50,TRUE,barcode_missing
-SKU0004,SKU0004,,Coca-Cola,Coke Original 1.5L x 12 units,Beverage,Soft Drink,1.5,L,12,product_name,340,TRUE,barcode_missing;no_supplier_price
-SKU0005,SKU0005,,Coca-Cola,Coke Original 2L x 6 units,Beverage,Soft Drink,2,L,6,product_name,230,TRUE,barcode_missing;no_supplier_price
-SKU0006,SKU0006,,NESTLE,NESTLE Pure Life Drinking Water 1.5L Pack 6,Beverage,Drinking Water,1.5,L,6,product_name,50,TRUE,barcode_missing
-SKU0007,SKU0007,,NESTLE,NESTLE Pure Life Drinking Water 600ml Pack 12,Beverage,Drinking Water,600,ml,12,product_name,50,TRUE,barcode_missing;unit_corrected_L_to_ml;supplier_price_duplicate_of_SKU0006
-SKU0008,SKU0008,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 1.5L x 12 units,Beverage,Soft Drink,1.5,L,12,inferred_from_price_note,340,TRUE,barcode_missing;no_supplier_price;pack_qty_inferred
-SKU0009,SKU0009,,Coca-Cola,Coke Original 999ml x 12 units,Beverage,Soft Drink,999,ml,12,product_name,260,TRUE,barcode_missing;no_supplier_price
-SKU0010,SKU0010,,Coca-Cola,Coke Original 500ml x 12 units,Beverage,Soft Drink,500,ml,12,product_name,185,TRUE,barcode_missing;no_supplier_price
-SKU0011,SKU0011,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 999ml x 12 units,Beverage,Soft Drink,999,ml,12,inferred_from_price_note,260,TRUE,barcode_missing;no_supplier_price;pack_qty_inferred
-SKU0012,SKU0012,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 500ml x 12 units,Beverage,Soft Drink,500,ml,12,inferred_from_price_note,185,TRUE,barcode_missing;no_supplier_price;pack_qty_inferred
-SKU0013,SKU0013,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 325ml x 24 units,Beverage,Soft Drink,325,ml,24,product_name,325,TRUE,barcode_missing;no_supplier_price
-SKU0014,SKU0014,,Coca-Cola,Coke Original 240ml x 12 units,Beverage,Soft Drink,240,ml,12,product_name,132,TRUE,barcode_missing
-SKU0015,SKU0015,,SINGHA,SINGHA Lemon Soda 330ml x 6 units,Beverage,Soda,330,ml,6,product_name,85,TRUE,barcode_missing
+sku_code,legacy_sku_code,barcode,brand,product_name,category,subcategory,pack_size,pack_size_unit,pack_qty,retail_price,active,data_flags
+SKU0001,SKU001,8851959142011,Coca-Cola,Coke Original 325ml x 24 units,Beverage,Soft Drink,325,ml,24,325.00,TRUE,no_supplier_price
+SKU0002,SKU002,8850718801015,Lay's,Lay's Original 48g x 6 units,Snack,Potato Chips,48,g,6,100.00,TRUE,no_supplier_price
+SKU0003,SKU003,,SINGHA,SINGHA Drinking Water 1.5L Pack 6,Beverage,Drinking Water,1.5,L,6,50.00,TRUE,barcode_missing
+SKU0004,SKU004,,Coca-Cola,Coke Original 1.5L x 12 units,Beverage,Soft Drink,1.5,L,12,340.00,TRUE,barcode_missing;no_supplier_price
+SKU0005,SKU005,,Coca-Cola,Coke Original 2 L x 6 units,Beverage,Soft Drink,2,L,6,230.00,TRUE,barcode_missing;no_supplier_price
+SKU0006,SKU006,,NESTLE,NESTLE Pure Life Drinking Water 1.5 L. Pack 6,Beverage,Drinking Water,1.5,L,6,50.00,TRUE,barcode_missing
+SKU0007,SKU007,,NESTLE,NESTLE Pure Life Drinking Water 600 ml. Pack 12,Beverage,Drinking Water,600,ml,12,50.00,TRUE,barcode_missing
+SKU0008,SKU008,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 1.5 L.,Beverage,Soft Drink,1.5,L,1,340.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0009,SKU009,,Coca-Cola,Coke Original 999ml x 12 units,Beverage,Soft Drink,999,ml,12,260.00,TRUE,barcode_missing;no_supplier_price
+SKU0010,SKU010,,Coca-Cola,Coke Original 500ml x 12 units,Beverage,Soft Drink,500,ml,12,185.00,TRUE,barcode_missing;no_supplier_price
+SKU0011,SKU011,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 999 ml.,Beverage,Soft Drink,999,ml,1,260.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0012,SKU012,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 500 ml.,Beverage,Soft Drink,500,ml,1,185.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0013,SKU013,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 325ml. x24 units,Beverage,Soft Drink,325,ml,24,325.00,TRUE,barcode_missing;no_supplier_price
+SKU0014,SKU014,,Coca-Cola,Coke Original 240ml x 12 units,Beverage,Soft Drink,240,ml,12,132.00,TRUE,barcode_missing
+SKU0015,SKU015,,SINGHA,SINGHA Lemon Soda 330 ml. x 6 units,Beverage,Soda,330,ml,6,85.00,TRUE,barcode_missing
+SKU0016,SKU016,,ยูโร่,ยูโร่ คัสตาร์ดเค้ก 17 ก. 12 ชิ้น,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing
+SKU0017,SKU017,,ยูโร่,ยูโร่ พัฟเค้ก สอดไส้ครีมรสสตรอเบอร์รี่ 17 ก. x 12,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing;no_supplier_price
+SKU0018,SKU018,,ยูโร่,ยูโร่ พัฟเค้ก สอดไส้ครีมรสใบเตย 17 ก. x 12,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing
+SKU0019,SKU019,,ยูโร่,ยูโร่ เค้กกล้วย 17 ก. x 12,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing;no_supplier_price
+SKU0020,SKU020,,ยูโร่,ยูโร่ เค้ก รสเมล่อน 17 ก. x 12,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing
+SKU0021,SKU021,,ยูโร่,ยูโร่ เค้ก นมฮอกไกโด 17 ก. x 12,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing;no_supplier_price
+SKU0022,SKU022,,ยูโร่,ยูโร่ มาร์เบิ้ลเค้กไส้ครีมช็อกโกแลต 17 ก. 12 ชิ้น,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing
+SKU0023,SKU023,,ยูโร่,ยูโร่ ช็อกโกพาย พายสอดไส้ครีมเคลือบช็อกโกแลต 18 ก. x 12,Snack,Cake,18,g,12,50.00,TRUE,barcode_missing
+SKU0024,SKU024,,ยูโร่,ยูโร่ ช็อกโกพาย ไส้แยมราสเบอร์รี่ 17 ก. x 12,Snack,Cake,17,g,12,50.00,TRUE,barcode_missing
+SKU0025,SKU025,,ดีน่า,ดีน่า นมถั่วเหลือง ยูเอชที รสงาดำ 180 มล. x 4,Beverage,Soy Milk,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0026,SKU026,,ดีน่า,ดีน่านมถั่วเหลืองยูเอชทีน้ำตาลน้อยไขมันต่ำ180 มล. x 4,Beverage,Soy Milk,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0027,SKU027,,ดีน่า,ดีน่า กาบา นมถั่วเหลืองยูเอชที สูตรผสมจมูกข้าวญี่ปุ่น 180 มล. x 4,Beverage,Soy Milk,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0028,SKU028,,ดีน่า,ดีน่านมถั่วเหลืองยูเอชทีสูตรผสมน้ำนมข้าวโพด 180 มล. x 4,Beverage,Soy Milk,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0029,SKU029,,ไมโล,ไมโลนมยูเอชที 170มล.x 8,Beverage,Malted Milk,170,ml,8,70.00,TRUE,barcode_missing;no_supplier_price
+SKU0030,SKU030,,ไมโล,ไมโลนมยูเอชทีรสช็อกโกแลตมอลต์ 115มล. x 4,Beverage,Malted Milk,115,ml,4,33.00,TRUE,barcode_missing;no_supplier_price
+SKU0031,SKU031,,โอวัลติน,โอวัลติน นมยูเอชที รสมอลต์ช็อกโกแลต 180 มล. x 4,Beverage,Malted Milk,180,ml,4,37.00,TRUE,barcode_missing;no_supplier_price
+SKU0032,SKU032,,โอวัลติน,โอวัลตินสมาร์ท นมยูเอชที รสมอลต์ช็อกโกแลต110 มล. x 4,Beverage,Malted Milk,110,ml,4,37.00,TRUE,barcode_missing;no_supplier_price
+SKU0033,SKU033,,ไวตามิลค์,ไวตามิลค์สูตรออริจินัล 300มล. x 6,Beverage,Soy Milk,300,ml,6,60.00,TRUE,barcode_missing;no_supplier_price
+SKU0034,SKU034,,ไวตามิลค์,ไวตามิลค์สูตรออริจินัล 125มล.,Beverage,Soy Milk,125,ml,1,33.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0035,SKU035,,หนองโพ,หนองโพนมพร่องมันเนยยูเอชทีรสกาแฟ 225มล.x 4,Beverage,UHT Milk,225,ml,4,50.00,TRUE,barcode_missing;no_supplier_price
+SKU0036,SKU036,,หนองโพ,หนองโพนมยูเอชทีรสหวาน 225มล.x 4,Beverage,UHT Milk,225,ml,4,50.00,TRUE,barcode_missing;no_supplier_price
+SKU0037,SKU037,,หนองโพ,หนองโพนมยูเอชทีรสจืด 225มล.x 4,Beverage,UHT Milk,225,ml,4,50.00,TRUE,barcode_missing;no_supplier_price
+SKU0038,SKU038,,ไทยเดนมาร์ค,ไทยเดนมาร์ครสช็อกโกแลต 200มล.x 4,Beverage,UHT Milk,200,ml,4,70.00,TRUE,barcode_missing;no_supplier_price
+SKU0039,SKU039,,ไทยเดนมาร์ค,ไทยเดนมาร์ครสจืด 200มล..x 4,Beverage,UHT Milk,200,ml,4,65.00,TRUE,barcode_missing;no_supplier_price
+SKU0040,SKU040,,ไทยเดนมาร์ค,ไทยเดนมาร์ครสจืด 125มล..x 4,Beverage,UHT Milk,125,ml,4,45.00,TRUE,barcode_missing;no_supplier_price
+SKU0041,SKU041,,ไทยเดนมาร์ค,นมไทยเดนมาร์ครสช็อกโกแลต 125 มล..x 4,Beverage,UHT Milk,125,ml,4,45.00,TRUE,barcode_missing;no_supplier_price
+SKU0042,SKU042,,ดัชมิลล์,ดัชมิลล์นมเปรี้ยวรสบลูเบอร์รี่ 180มล..x 4,Beverage,Yogurt Drink,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0043,SKU043,,ดัชมิลล์,ดัชมิลล์นมเปรี้ยวรสส้ม 180มล..x 4,Beverage,Yogurt Drink,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0044,SKU044,,ดัชมิลล์,ดัชมิลล์นมเปรี้ยวรสผลไม้รวม 180มล..x 4,Beverage,Yogurt Drink,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0045,SKU045,,ดัชมิลล์,ดัชมิลล์นมเปรี้ยวรสเบอร์รี่รวม 180มล..x 4,Beverage,Yogurt Drink,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0046,SKU046,,ดัชมิลล์,ดัชมิลล์นมเปรี้ยวรสสตอเบอร์รี่ 180มล..x 4,Beverage,Yogurt Drink,180,ml,4,35.00,TRUE,barcode_missing;no_supplier_price
+SKU0047,SKU047,,ดัชมิลล์,ดัชมิลล์คิดส์นมเปรี้ยวรสผลไม้รวม 90มล.,Beverage,Yogurt Drink,90,ml,1,19.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0048,SKU048,,ดัชมิลล์,ดัชมิลล์คิดส์นมเปรี้ยวรสส้ม 90มล.,Beverage,Yogurt Drink,90,ml,1,19.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0049,SKU049,,ดัชมิลล์,ดัชมิลล์คิดส์นมเปรี้ยวรสเบอรี่รวม 90มล.,Beverage,Yogurt Drink,90,ml,1,19.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0050,SKU050,,ดัชมิลล์,ดัชมิลล์คิดส์นมเปรี้ยวรสบลูเบอร์รี่ 90มล.,Beverage,Yogurt Drink,90,ml,1,19.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0051,SKU051,,ดัชมิลล์,ดัชมิลล์คิดส์นมเปรี้ยวรสสตอเบอรี่ 90มล.,Beverage,Yogurt Drink,90,ml,1,19.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0052,SKU052,,ดัชมิลล์,ดัชมิลล์ซีเล็คเต็ดรสจืด 180มล.,Beverage,UHT Milk,180,ml,1,37.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0053,SKU053,,โฟร์โมสต์,โฟร์โมสต์รสจืด 225 มล.,Beverage,UHT Milk,225,ml,1,70.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0054,SKU054,,โฟร์โมสต์,โฟร์โมสต์รสสตอเบอรี่ 225 มล.,Beverage,UHT Milk,225,ml,1,70.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0055,SKU055,,โฟร์โมสต์,โฟร์โมสต์รสช็อกโกแลต 180 มล.,Beverage,UHT Milk,180,ml,1,39.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0056,SKU056,,โฟร์โมสต์,โฟร์โมสต์รสจืด 180 มล.,Beverage,UHT Milk,180,ml,1,39.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0057,SKU057,,โฟร์โมสต์,โฟร์โมสต์รสจืด 80 มล.,Beverage,UHT Milk,80,ml,1,33.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0058,SKU058,,ดีมอลต์,ดีมอลต์ไฮ10แคลเซี่ยม 180มล.,Beverage,Malted Milk,180,ml,1,35.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0059,SKU059,,ดีมอลต์,ดีมอลต์ไฮ10แคลเซี่ยม 90มล.,Beverage,Malted Milk,90,ml,1,19.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0060,SKU060,,แลคตาซอย,แลคตาซอยเจ 300มล.,Beverage,Soy Milk,300,ml,1,60.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0061,SKU061,,แลคตาซอย,แลคตาซอยรสจืดสูตรไม่เติมน้ำตาลทราย 300มล.,Beverage,Soy Milk,300,ml,1,60.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0062,SKU062,,แลคตาซอย,แลคตาซอยรสหวานออริจินัล 300 มล.,Beverage,Soy Milk,300,ml,1,60.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0063,SKU063,,แลคตาซอย,แลคตาซอยไลท์ผสมคอลลาเจน 250 มล.,Beverage,Soy Milk,250,ml,1,60.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0064,SKU064,,แลคตาซอย,แลคตาซอยรสช็อกโกแลตน้ำตาลน้อยลง 250มล.,Beverage,Soy Milk,250,ml,1,60.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0065,SKU065,,แลคตาซอย,แลคตาซอยงาดำยูเอชที 125มล.,Beverage,Soy Milk,125,ml,1,33.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0066,SKU066,,แลคตาซอย,แลคตาซอยรสหวาน 125 มล.,Beverage,Soy Milk,125,ml,1,33.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0067,SKU067,,แลคตาซอย,แลคตาซอยรสช็อกโกแลต 125 มล.,Beverage,Soy Milk,125,ml,1,33.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0068,SKU068,,ซีวิต,ซี-วิต เครื่องดื่มวิตามินซี รสทับทิม 140 มล.,Beverage,Vitamin Drink,140,ml,1,140.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0069,SKU069,,ซีวิต,ซี-วิต เครื่องดื่มวิตามินซี รสเลมอน 140 มล.,Beverage,Vitamin Drink,140,ml,1,140.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0070,SKU070,,ซีวิต,ซี-วิต เครื่องดื่มวิตามินซี รสออเร้นจ์ 140 มล.,Beverage,Vitamin Drink,140,ml,1,140.00,TRUE,pack_qty_not_in_name;barcode_missing;no_supplier_price
+SKU0071,SKU071,,โป๊ยเซียน,ยาดมโป๊ยเซียน(กล่องใหญ่),Health,Inhaler,,box,1,,TRUE,pack_qty_not_in_name;barcode_missing;no_retail_price;no_supplier_price
+SKU0072,SKU072,,Royal-D,เกลือแร่ Royal-D ผลไม้รวม (กล่องใหญ่50ซอง),Health,Electrolyte,50,sachets,50,185.00,TRUE,barcode_missing;no_supplier_price
+SKU0073,SKU073,,ดีแชมป์,ดีแชมป์เกลือแร่รสส้ม (กล่อง50ซอง),Health,Electrolyte,50,sachets,50,185.00,TRUE,barcode_missing;no_supplier_price
+SKU0074,SKU074,,อีโน,อีโนผงฟู่รสส้ม 4.3กรัม,Health,Antacid,4.3,g,1,,TRUE,pack_qty_not_in_name;barcode_missing;no_retail_price;no_supplier_price
+SKU0075,SKU075,,อีโน,อีโน รสมะนาว 4.3 กรัม,Health,Antacid,4.3,g,1,,TRUE,pack_qty_not_in_name;barcode_missing;no_retail_price;no_supplier_price
+SKU0076,SKU076,,ผงวิเศษ,ผงวิเศษ ตราร่มชูชีพ(กล่อง36ซอง),Personal Care,Skin Powder,36,sachets,36,,TRUE,barcode_missing;no_retail_price;no_supplier_price
+SKU0077,SKU077,,ทัมใจ,ทัมใจผง(กล่อง100ซอง),Health,Analgesic,100,sachets,100,,TRUE,barcode_missing;no_retail_price;no_supplier_price
+SKU0078,SKU078,,แอนตาซิล,แอนตาซิล (กล่อง50*10เม็ด),Health,Antacid,500,tablets,1,,TRUE,pack_qty_not_in_name;barcode_missing;no_retail_price;no_supplier_price
+SKU0079,SKU079,,ซาร่า,ซาร่า(กล่อง20แผง),Health,Analgesic,20,strips,20,,TRUE,barcode_missing;no_retail_price;no_supplier_price
+SKU0080,SKU080,,ซาร่า,ซาร่าเม็ดรี(กล่อง20แผง),Health,Analgesic,20,strips,20,,TRUE,barcode_missing;no_retail_price;no_supplier_price
+SKU0081,SKU081,,ทิฟฟี่,ทิฟฟี่ เดย์ (กล่อง25แผง),Health,Cold Medicine,25,strips,25,,TRUE,barcode_missing;no_retail_price;no_supplier_price
+SKU0082,SKU082,,ไทลินอล,ไทลินอล (กล่อง20แผง),Health,Analgesic,20,strips,20,,TRUE,barcode_missing;no_retail_price;no_supplier_price
+SKU0083,SKU083,,พาราแคพ,พาราแคพ (กล่อง50แผง),Health,Analgesic,50,strips,50,,TRUE,barcode_missing;no_retail_price;no_supplier_price
+SKU0084,SKU084,,พาราแคพ,พาราแคพกระปุกกลาง,Health,Analgesic,,jar,1,,TRUE,pack_qty_not_in_name;barcode_missing;no_retail_price;no_supplier_price
+SKU0085,SKU085,,พาราแคพ,พาราแคพกระปุกใหญ่,Health,Analgesic,,jar,1,,TRUE,pack_qty_not_in_name;barcode_missing;no_retail_price;no_supplier_price
+SKU0086,,,Go Choco,Go Choco โกช็อคโก้โรล เวเฟอร์สติ๊กไส้ครีมช็อกโกแลต 320กรัม 3.- (20ซอง x 16กรัม),,,320,g,16,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0087,,,ครีมโอ,ครีมโอ คุกกี้แซนด์วิชรสช็อกโกแลตสอดไส้ครีมกลิ่นวานิลลา 27 ก. แพ็ค 12,,,27,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0088,,,ชาช่า,ชาช่า เมล็ดทานตะวัน กลิ่นมะพร้าว 18 ก. แพ็ค 12,,,18,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0089,,,ชาช่า,ชาช่า เมล็ดทานตะวัน รสมะพร้าว 35 ก. แพ็ค 6,,,35,g,6,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0090,,,ชาช่า,ชาช่า เมล็ดทานตะวันกลิ่นมะพร้าว 72 ก. แพ็ค 6,,,72,g,6,100.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0091,,,ช้างน้อย,ตรามือเมล็ดฟักทอง33กรัม,,,33,g,1,50.00,TRUE,pack_qty_not_in_name;barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0092,,,ช้างน้อย,ยำยำ ช้างน้อย บะหมี่กึ่งสำเร็จรูป รสข้าวโพด 20 ก. x 12 ชิ้น,,,20,g,12,35.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0093,,,ช้างน้อย,ยำยำ ช้างน้อย บะหมี่กึ่งสำเร็จรูป รสซุปเปอร์เลมอน 20 ก. x 12 ซอง,,,20,g,12,35.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0094,,,ช้างน้อย,ยำยำ ช้างน้อย บะหมี่กึ่งสำเร็จรูป รสต้มยำ 22 ก. x 12 ซอง,,,22,g,12,35.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0095,,,ช้างน้อย,ยำยำ ช้างน้อย บะหมี่กึ่งสำเร็จรูป รสบาร์บีคิว 20 ก. x 12 ชิ้น,,,20,g,12,35.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0096,,,ช้างน้อย,ยำยำ ช้างน้อย บะหมี่กึ่งสำเร็จรูป รสโนริสาหร่าย 20 ก. x 12 ชิ้น,,,20,g,12,35.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0097,,,ซุปเปอร์สตาร์,ซุปเปอร์สตาร์ทวิน36ก. 5 บาท,,,36,g,1,50.00,TRUE,pack_qty_not_in_name;barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0098,,,ซูโม่,ซูโม่ มินิคุกกี้ไส้ครีม 30 ก. แพ็ค 12,,,30,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0099,,,ดิวเบอร์รี่,ดิวเบอร์รี่ คุกกี้แซนด์วิชสอดไส้ครีมและแยม กลิ่นบลูเบอร์รี่ 27 ก. แพ็ค 12,,,27,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0100,,,ดิวเบอร์รี่,ดิวเบอร์รี่ คุกกี้แซนด์วิชสอดไส้ครีมและแยม กลิ่นสตรอว์เบอร์รี่ 27 ก. แพ็ค 12 ซอง,,,27,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0101,,,ทิวลี่,ทิวลี่ ครั้นชี่เฟลค เวเฟอร์สอดไส้โอวัลตินช็อกมอลต์และเฟลค 26 ก. แพ็ค 12,,,26,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0102,,,ทิวลี่,ทิวลี่ ทรีโอ ช็อกโก เวเฟอร์รสช็อกโกแลตสอดไส้ครีม 28 ก. แพ็ค 12,,,28,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0103,,,ทิวลี่,ทิวลี่ ทวิน เวเฟอร์สอดไส้ครีมรสช็อกโกแลตเคลือบช็อกโกแลต 10 ก. แพ็ค 24,,,10,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0104,,,ทิวลี่,ทิวลี่ ทวิน เวเฟอร์สอดไส้ครีมรสนมเคลือบครีมรสนม 10 ก. แพ็ค 24,,,10,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0105,,,ทิวลี่,ทิวลี่ ทวิน เวเฟอร์สอดไส้ครีมรสวานิลลาเคลือบช็อกโกแลต 10 ก. แพ็ค 24,,,10,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0106,,,ทิวลี่,ทิวลี่ ทวิน เวเฟอร์สอดไส้แยมกลิ่นสตรอเบอร์รี่เคลือบช็อกโกแลต 10 ก. แพ็ค 24,,,10,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0107,,,ทิวลี่,ทิวลี่ บิ๊กบอม ช็อก คาราเมล 20 ก. แพ็ค 12 ชิ้น,,,20,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0108,,,พานาโซนิค,ถ่านเขียวพานาโซนิค AA (กล่อง15แพ็ค60ก้อน ),,,,,60,375.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0109,,,พานาโซนิค,ถ่านเขียวพานาโซนิค AA (กล่อง1แพ็ค4ก้อน ),,,,,4,25.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0110,,,พานาโซนิค,ถ่านเขียวพานาโซนิค AAA (1แพ็ค4ก้อน ),,,,,4,25.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0111,,,พานาโซนิค,ถ่านเขียวพานาโซนิค AAA (กล่อง1 5แพ็ค60ก้อน ),,,,,60,375.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0112,,,พิคคาเดลีริคโค,พิคคาเดลีริคโค23.5ก.ช็อกฯ,,,23.5,g,1,50.00,TRUE,pack_qty_not_in_name;barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0113,,,ฟันโอ,ฟันโอ คุกกี้แซนวิช สอดไส้ครีมคัสตาร์ด 40.5 ก. แพ็ค 12,,,40.5,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0114,,,ฟันโอ,ฟันโอ คุกกี้แซนวิช สอดไส้ครีมช็อกโกแลต 40.5 ก.แพ็ค 12,,,40.5,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0115,,,ฟันโอ,ฟันโอ คุกกี้แซนวิช สอดไส้ครีมสตรอว์เบอร์รี่ 40.5 ก. แพ็ค 12,,,40.5,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0116,,,ฟันโอ,ฟันโอ คุกกี้แซนวิชรสช็อกโกแลต สอดไส้ครีมคุกกี้แอนด์ครีม 40.5 ก. แพ็ค 12,,,40.5,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0117,,,ฟันโอ,ฟันโอ คุกกี้แซนวิชรสช็อกโกแลต สอดไส้ครีมชาเขียว 40.5 ก. แพ็ค 12,,,40.5,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0118,,,ฟันโอ,ฟันโอ คุกกี้แซนวิชรสช็อกโกแลต สอดไส้ครีมช็อกโกแลต 40.5 ก. แพ็ค 12,,,40.5,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0119,,,มอลคิสท์,มอลคิสท์ แครกเกอร์ รสบาร์บีคิวฟลอส 14 ก. แพ็ค 24,,,14,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0120,,,มอลคิสท์,มอลคิสท์ แครกเกอร์ รสออริจินอล 14 ก. 24 ชิ้น,,,14,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0121,,,มอลคิสท์,มอลคิสท์ แครกเกอร์ สอดไส้ครีมรสคาปูชิโน 46 กรัม แพ็ก 12,,,46,g,1,50.00,TRUE,pack_qty_not_in_name;barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0122,,,วอยซ์,วอยซ์ วาฟเฟิล ช็อกโก คริสปี้ 21 ก. แพ็ค 12,,,21,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0123,,,เจอรี่,เจอรี่ (Gery) เวเฟอร์รสช็อกโกแลต (น้ำหนักสุทธิ10 กรัม x 24 ชิ้น),,,10,g,24,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0124,,,เจอรี่,เจอรี่ ครันช์โรล เวเฟอร์โรลสอดไส้ช็อกโกแลตเคลือบคาราเมล บิสกิตและช็อกโกแลต 276 ก,,,276,g,1,50.00,TRUE,pack_qty_not_in_name;barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0125,,,เถ้าแก่น้อย,เถ้าแก่น้อย บิ๊กชีท สาหร่ายทอดกรอบ รสซีฟู้ด 3.2 ก. x 12 ชิ้น,,,3.2,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0126,,,เถ้าแก่น้อย,เถ้าแก่น้อย บิ๊กโรล สาหร่ายย่างสไตล์ญี่ปุ่น รสคลาสสิก 3 ก. x 12 ชิ้น,,,3,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0127,,,เถ้าแก่น้อย,เถ้าแก่น้อย สาหร่ายทอดปรุงรส แผ่นใหญ่ รสคลาสสิก 3.2 ก. x 12 ชิ้น,,,3.2,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0128,,,เถ้าแก่น้อย,เถ้าแก่น้อย สาหร่ายทอดปรุงรส แผ่นใหญ่ รสเผ็ด 3.2 ก. x 12 ชิ้น,,,3.2,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0129,,,เบงเบง,เบง เบง เวเฟอร์สอดไส้ครีมเคลือบคาราเมลช็อกโกแลตและข้าวพอง 20 ก. แพ็ค 12,,,20,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0130,,,เบงเบง,เบงเบง เวเฟอร์ รสไวท์ช็อกโกแลต 20 ก. แพ็ค 12,,,20,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0131,,,เมจิกทวิน,เมจิก ทวิน แครกเกอร์ ไส้ครีมรสช็อกโกแลต ขนาด 15 ก. แพ็ค 24,,,15,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0132,,,เมจิกทวิน,เมจิกทวิน แครกเกอร์ช็อกโกแลตสอดไส้ช็อกโกแลต ขนาด 24 ชิ้น,,,15,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0133,,,เมจิกทวิน,เมจิกทวิน แครกเกอร์สอดไส้ครีม กลิ่นเนย ขนาด 24 ชิ้น,,,15,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0134,,,แคลชีส,แคลชีส เวเฟอร์สอดไส้ครีม รสชีส 27.5 ก. แพ็ค 12,,,27.5,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0135,,,แยมโอแยม,แยมโอแยม คุกกี้สอดไส้บลูเบอร์รี่ 32 ก. x 12 ชิ้น,,,32,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0136,,,แยมโอแยม,แยมโอแยม บิสกิตนมสอดไส้แยมรสสับปะรด 32กรัมx12ห่อ,,,32,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0137,,,โอรีโอ้,โอรีโอ คุกกี้แซนวิชรสช็อกโกแลต สอดไส้ครีมช็อกโกแลต 27.6 ก. แพ็ค 12,,,27.6,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0138,,,โอรีโอ้,โอรีโอ้ คุกกี้แซนวิชรสช็อกโกแลต สอดไส้ครีมวานิลลา 27.6 ก. แพ็ค 12,,,27.6,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0139,,,โอวัลติน,โอวัลติน คุกกี้โอวัลตินสอดไส้ครีมช็อกโกแลตมอลต์ 30 ก. แพ็ค 12,,,30,g,12,50.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0140,,,ไตรแองเกิล,ไตรแองเกิล รสช็อกโกแลต 8กรัมx24 ชิ้น,,,8,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price
+SKU0141,,,ไตรแองเกิล,ไตรแองเกิล สแน็ค วิท มิลค์ ฟิลลิ่ง (ปริมาณสุทธิ 8 กรัม 24 ชิ้น),,,8,g,24,40.00,TRUE,barcode_missing;category_missing;sku_assigned_by_import;no_supplier_price

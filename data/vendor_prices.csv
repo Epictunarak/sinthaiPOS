@@ -1,28 +1,57 @@
 sku_code,vendor,vendor_role,price,price_basis,confidence,checked_date,source_url,note
-SKU0001,Makro,supplier,14.50,unit,verified,2026-05-16,,ราคาต่อกระป๋องเดี่ยว ไม่ใช่ราคาลัง 24
-SKU0001,Lotus,competitor,15.00,unit,verified,2026-05-16,,ราคาต่อกระป๋องเดี่ยว
-SKU0001,BigC,competitor,15.00,unit,verified,2026-05-16,,ราคาต่อกระป๋องเดี่ยว
-SKU0002,Makro,supplier,19.00,unit,verified,2026-05-16,,ราคาต่อถุงเดี่ยว ไม่ใช่ราคาแพ็ค 6
-SKU0002,Lotus,competitor,20.00,unit,verified,2026-05-16,,ราคาต่อถุงเดี่ยว
-SKU0002,BigC,competitor,20.00,unit,verified,2026-05-16,,ราคาต่อถุงเดี่ยว
-SKU0003,Makro,supplier,49.00,pack,verified,2026-05-16,https://www.makro.pro/en/p/9zvr82iu-6761199173827,
-SKU0003,Lotus,competitor,55.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/singha-drinking-water-1500ml-x-6pcs-150146313,
-SKU0003,BigC,competitor,55.00,pack,verified,2026-05-16,https://www.bigc.co.th/product/sigha-water-1-5-l-pack-6.744,
-SKU0004,Lotus,competitor,341.00,pack,verified,2026-05-16,https://www.lotuss.com/en/product/coke-soft-drink-original-15l-x-12pcs-clubpack-168688528,
-SKU0004,BigC,competitor,330.00,pack,verified,2026-05-16,https://www.bigc.co.th/shop/coca-cola/group/shop-coca-cola-brand-coke,
-SKU0005,BigC,competitor,213.00,pack,comparable,2026-05-16,https://www.bigc.co.th/product/coca-cola-coke-soft-drink-original-taste-less-sugar-1-9-l-6-bottles-8851959629017.70904,เทียบจากขนาด 1.95L x6 ไม่ใช่ 2L x6 พอดี
-SKU0006,Makro,supplier,47.00,pack,listing,2026-05-16,https://www.makro.pro/en/c/search?q=NESTLE,เจอจากหน้า search ไม่ใช่หน้าสินค้าตรงรุ่น
-SKU0006,Lotus,competitor,55.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/nestl-pure-life-drinking-water-1500ml-x-6pcs-150223816,
-SKU0006,BigC,competitor,62.00,pack,listing,2026-05-16,https://www.bigc.co.th/shop/nestle/group/shop-nestle-brand-nestle-purelife,เจอจากหน้าแบรนด์ ไม่ใช่หน้าสินค้าตรงรุ่น
-SKU0007,Makro,supplier,47.00,pack,listing,2026-05-16,https://www.makro.pro/en/c/search?q=NESTLE,ค่าซ้ำกับ SKU0006 - น่าจะเป็นราคาจากหน้า search เดียวกัน ต้องตรวจใหม่
-SKU0007,BigC,competitor,62.00,pack,listing,2026-05-16,https://www.bigc.co.th/shop/nestle/group/shop-nestle-brand-nestle-purelife,ค่าซ้ำกับ SKU0006 - ต้องตรวจใหม่
-SKU0008,Lotus,competitor,375.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/168843247,Fanta fruit punch 1.5L x12
-SKU0008,BigC,competitor,336.00,pack,verified,2026-05-16,https://www.bigc.co.th/group/fanta-20250130,Fanta green/mixed fruit 1.5L x12
-SKU0009,BigC,competitor,299.00,pack,comparable,2026-05-16,https://www.bigc.co.th/shop/coca-cola/group/shop-coca-cola-brand-coke,เทียบจากขนาด 1L x12 ไม่ใช่ 999ml x12 พอดี
-SKU0010,Lotus,competitor,186.00,pack,verified,2026-05-16,https://www.lotuss.com/en/smartx/product/171322073,
-SKU0011,BigC,competitor,299.00,pack,comparable,2026-05-16,https://www.bigc.co.th/group/tnt-disc-20230810,เทียบจากขนาด 1L x12 ไม่ใช่ 999ml พอดี
-SKU0012,Lotus,competitor,186.00,pack,comparable,2026-05-16,,อ้างอิงราคาเดียวกับ Coke 500ml x12 - ต้องตรวจหน้าสินค้า Fanta จริง
-SKU0013,BigC,competitor,316.00,pack,verified,2026-05-16,,
-SKU0014,Makro,supplier,149.00,pack,verified,2026-05-16,,
-SKU0015,Makro,supplier,83.00,pack,verified,2026-05-16,,
-SKU0015,BigC,competitor,83.00,pack,verified,2026-05-16,,
+SKU0001,BigC,competitor,15.00,pack,template_sample,2026-05-16,https://www.google.com/search?q=Coke+Original+325ml+x+24+units+BigC+ราคา,Original sample data retained from template.
+SKU0001,Lotus,competitor,15.00,pack,template_sample,2026-05-16,https://www.google.com/search?q=Coke+Original+325ml+x+24+units+Lotus+ราคา,Original sample data retained from template.
+SKU0001,Makro,supplier,14.50,pack,template_sample,2026-05-16,https://www.google.com/search?q=Coke+Original+325ml+x+24+units+Makro+ราคา,Original sample data retained from template.
+SKU0002,BigC,competitor,20.00,pack,template_sample,2026-05-16,https://www.google.com/search?q=Lay%27s+Original+48g+x+6+units+BigC+ราคา,Original sample data retained from template.
+SKU0002,Lotus,competitor,20.00,pack,template_sample,2026-05-16,https://www.google.com/search?q=Lay%27s+Original+48g+x+6+units+Lotus+ราคา,Original sample data retained from template.
+SKU0002,Makro,supplier,19.00,pack,template_sample,2026-05-16,https://www.google.com/search?q=Lay%27s+Original+48g+x+6+units+Makro+ราคา,Original sample data retained from template.
+SKU0003,BigC,competitor,55.00,pack,verified,2026-05-16,https://www.bigc.co.th/product/sigha-water-1-5-l-pack-6.744,BigC official Singha water 1.5L pack 6 THB55.
+SKU0003,Lotus,competitor,55.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/singha-drinking-water-1500ml-x-6pcs-150146313,Lotus official Singha water 1.5L x6 THB55.
+SKU0003,Makro,supplier,49.00,pack,verified,2026-05-16,https://www.makro.pro/en/p/9zvr82iu-6761199173827,Makro official Singha water 1.5L x6 THB49.
+SKU0004,BigC,competitor,330.00,pack,listing,2026-05-16,https://www.bigc.co.th/shop/coca-cola/group/shop-coca-cola-brand-coke,BigC official Coke 1.5L x12 THB330; exact product page may vary by listing.
+SKU0004,Lotus,competitor,341.00,pack,verified,2026-05-16,https://www.lotuss.com/en/product/coke-soft-drink-original-15l-x-12pcs-clubpack-168688528,Lotus official COKE 1.5 LT. PACK 12 THB341.
+SKU0005,BigC,competitor,213.00,pack,comparable,2026-05-16,https://www.bigc.co.th/product/coca-cola-coke-soft-drink-original-taste-less-sugar-1-9-l-6-bottles-8851959629017.70904,BigC closest comparable Coke Original 1.95L x6 THB213; exact 2L x6 not found.
+SKU0006,BigC,competitor,62.00,pack,listing,2026-05-16,https://www.bigc.co.th/shop/nestle/group/shop-nestle-brand-nestle-purelife,BigC official Nestle Pure Life 1.5L pack 6 THB62.
+SKU0006,Lotus,competitor,55.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/nestl-pure-life-drinking-water-1500ml-x-6pcs-150223816,Lotus official Nestle Pure Life 1.5L x6 THB55.
+SKU0006,Makro,supplier,47.00,pack,listing,2026-05-16,https://www.makro.pro/en/c/search?q=NESTLE,Makro official search listing shows Nestle Pure Life 1.5L x6 THB47.
+SKU0007,BigC,competitor,62.00,pack,listing,2026-05-16,https://www.bigc.co.th/shop/nestle/group/shop-nestle-brand-nestle-purelife,BigC official Nestle Pure Life 600ml pack 12 THB62.
+SKU0007,Makro,supplier,47.00,pack,listing,2026-05-16,https://www.makro.pro/en/c/search?q=NESTLE,Makro official search listing THB47; Lotus exact 600ml pack 12 not found.
+SKU0008,BigC,competitor,336.00,pack,listing,2026-05-16,https://www.bigc.co.th/group/fanta-20250130,BigC Fanta green/mixed fruit 1.5L x12 THB336.
+SKU0008,Lotus,competitor,375.00,pack,comparable,2026-05-16,https://shopping.lotuss.com/en/product/168843247,Lotus Fanta fruit punch 1.5L x12 THB375; flavor naming differs.
+SKU0009,BigC,competitor,299.00,pack,comparable,2026-05-16,https://www.bigc.co.th/shop/coca-cola/group/shop-coca-cola-brand-coke,BigC closest comparable Coke Original 1L x12 THB299; exact 999ml x12 not found.
+SKU0010,Lotus,competitor,186.00,pack,verified,2026-05-16,https://www.lotuss.com/en/smartx/product/171322073,Lotus official Coke 500ml x12 THB186; BigC/Makro exact not found.
+SKU0011,BigC,competitor,299.00,pack,comparable,2026-05-16,https://www.bigc.co.th/group/tnt-disc-20230810,BigC closest comparable Fanta 1L x12 THB299; exact 999ml pack not found.
+SKU0012,Lotus,competitor,186.00,pack,comparable,2026-05-16,https://shopping.lotuss.com/en/product/171326974,Lotus Fanta fruit punch 500ml x12 THB186; BigC/Makro exact not found.
+SKU0013,BigC,competitor,316.00,pack,comparable,2026-05-16,https://www.bigc.co.th/group/fanta-20250130,BigC Fanta 325ml x24 THB316 for comparable flavor listings.
+SKU0014,Makro,supplier,149.00,pack,comparable,2026-05-16,https://www.makro.pro/en/p/kz8iaf5-7078660309187,Makro closest comparable Coke Original 250ml x12 THB149; exact 240ml x12 not found.
+SKU0015,BigC,competitor,83.00,pack,comparable,2026-05-16,https://www.bigc.co.th/shop/singha/group/shop-singha-crazy-deal,BigC comparable Singha lemon soda 330ml x6 listings THB83.
+SKU0015,Makro,supplier,83.00,pack,comparable,2026-05-16,https://www.makro.pro/en/p/cfar5hht-7325020881091,Makro Singha Yuzu/Pink lemon soda 330ml x6 THB83; Lotus exact not found.
+SKU0016,Makro,supplier,51.00,pack,verified,2026-06-01,https://www.makro.pro/p/6761187377347,"Makro result showed Euro custard cake 17g x12 THB51, code 140478."
+SKU0018,Makro,supplier,51.00,pack,verified,2026-06-01,https://www.makro.pro/th/p/810410-7078650872003,"Makro result showed Euro pandan puff cake 17g x12 THB51, code 810410."
+SKU0020,BigC,competitor,42.00,pack,comparable,2026-06-01,https://www.bigc.co.th/en/group/bmk-pie-puff-cake,BigC category showed Euro melon cake 144g THB42; pack differs from 17g x12.
+SKU0020,Makro,supplier,51.00,pack,verified,2026-06-01,https://www.makro.pro/en/p/o7vyb8lm-7078725550275,"Makro result showed Euro melon cake 17g x12 THB51, SKU/code 820653."
+SKU0022,Makro,supplier,51.00,pack,listing,2026-06-01,https://www.makro.pro/c/collections/Roll%20Max%20%7C%20Max%20Value%20at%20makro,Makro category showed Euro marble cake chocolate cream 17g x12 THB51.
+SKU0023,Makro,supplier,48.00,pack,verified,2026-06-01,https://www.makro.pro/p/7078725451971,"Makro result showed Euro Choco Pie chocolate cream 18g x12 THB48, code 110962."
+SKU0024,BigC,competitor,40.00,pack,comparable,2026-06-01,https://www.bigc.co.th/category/pie-puff-cake?page=2,BigC category showed Euro raspberry pie 144g THB40; pack/description differs.
+SKU0024,Makro,supplier,51.00,pack,verified,2026-06-01,https://www.makro.pro//p/923664-848670550558163,"Makro result showed Euro Choco Pie raspberry jam 17g x12 THB51, code 923664."
+SKU0025,BigC,competitor,38.00,pack,listing,2026-06-01,https://www.bigc.co.th/en/category/plant-milk,BigC category showed Dina black sesame 180ml x4 THB38; promo snippets may vary.
+SKU0025,Lotus,competitor,38.00,pack,listing,2026-06-01,https://shopping.lotuss.com/en/product/dna-soy-milk-with-extra-black-sesame-180ml-x-4pcs-166578339,Lotus result showed DNA black sesame 180ml x4 THB38.
+SKU0026,BigC,competitor,38.00,pack,listing,2026-06-01,https://www.bigc.co.th/en/category/plant-milk,BigC category showed similar Dina black sesame low sugar 180ml x4 THB38; promo snippets may vary.
+SKU0026,Lotus,competitor,38.00,pack,listing,2026-06-01,https://www.lotuss.com/th/product/170560665,Lotus result showed Dina black sesame low sugar 180ml pack 4 THB38.
+SKU0027,BigC,competitor,38.00,pack,listing,2026-06-01,https://www.bigc.co.th/en/category/plant-milk,BigC category showed Dina Gaba 180ml x4 THB38; some promo snippets showed THB36.
+SKU0028,BigC,competitor,38.00,pack,verified,2026-06-01,https://www.bigc.co.th/product/dutch-mill-dina-uht-soy-milk-mixed-with-corn-milk-180-ml-pack-4.5811,BigC product page showed Dina corn milk 180ml x4 THB38.
+SKU0030,BigC,competitor,32.00,pack,comparable,2026-06-01,https://www.bigc.co.th/search?q=ไมโล%20นมยูเอชที%20115%20มล.%20แพ็ค%204,"BigC search showed Milo 110ml x4 THB32, closest to source 115ml x4."
+SKU0031,BigC,competitor,45.00,pack,verified,2026-06-01,https://www.bigc.co.th/ovaltine-uht-milk-hi9-180-ml.html,BigC product page showed Ovaltine 180ml pack 4 THB45.
+SKU0031,Lotus,competitor,45.00,pack,verified,2026-06-01,https://shopping.lotuss.com/th/smartx/product/ovaltine-high-calcium-malt-chocolate-flavoured-uht-milk-product-180ml-x-4pcs-162618708,Lotus current snippet showed THB45; an older snippet showed THB40.
+SKU0033,BigC,competitor,85.00,pack,verified,2026-06-01,https://www.bigc.co.th/product/vitamilk-to-go-original-soy-milk-300-ml-6-bottles.597.597,BigC exact product page showed THB85; other category snippets conflicted at THB60/89.
+SKU0033,Lotus,competitor,60.00,pack,verified,2026-06-01,https://shopping.lotuss.com/th/product/vitamilk-original-uht-soymilk-300ml-x-6pcs-169350483,Lotus result showed Vitamilk original 300ml x6 THB60.
+SKU0035,BigC,competitor,51.00,pack,listing,2026-06-01,https://www.bigc.co.th/search?q=หนองโพ%20นมยูเอชที%20225%20มล.%20แพ็ค%204,BigC search showed Nongpho coffee 225ml pack 4 THB51.
+SKU0035,Lotus,competitor,51.00,pack,comparable,2026-06-01,https://www.lotuss.com/th/product/52013735,Lotus showed Nongpho coffee 225ml single THB12.75; pack-4 equivalent entered as THB51.
+SKU0036,BigC,competitor,51.00,pack,listing,2026-06-01,https://www.bigc.co.th/search?q=หนองโพ%20นมยูเอชที%20รสจืด%20ขนาด%20225%20มล.%20แพ็ค%204,BigC search listing showed Nongpho sweetened 225ml x4 THB51.
+SKU0036,Lotus,competitor,51.00,pack,listing,2026-06-01,https://ppe-shopping.lotuss.com/th/product/nongpho-uht-sweetened-flavoured-milk-225ml-x-4pcs-164556870,Lotus result showed Nongpho sweetened 225ml x4 THB51.
+SKU0037,BigC,competitor,51.00,pack,verified,2026-06-01,https://www.bigc.co.th/product/nhongpho-uht-milk-plain-flavor-size-225-ml-pack-4.11041,BigC result showed Nongpho plain 225ml pack 4 THB51.
+SKU0037,Lotus,competitor,51.00,pack,listing,2026-06-01,https://shopping.lotuss.com/en/product/nongpho-plain-flavour-uht-milk-225ml-x-4pcs-164556933,Lotus result showed Nongpho plain 225ml x4 THB51.
+SKU0042,BigC,competitor,38.00,pack,listing,2026-06-01,https://www.bigc.co.th/search?q=ดัชมิลล์%20นมเปรี้ยว%20รสบลูเบอร์รี่%20ยูเอชที%20180%20มล%20แพ็ค%204,Search result showed Dutch Mill blueberry 165ml x4 THB38; pack close but ml differs from source 180ml.
+SKU0045,BigC,competitor,33.00,pack,comparable,2026-06-01,https://www.bigc.co.th/group/uht-bigpack-20230818,BigC result showed Dutch Mill mixed berry 165ml x4 THB33; ml differs from source 180ml.
+SKU0045,Lotus,competitor,38.00,pack,listing,2026-06-01,https://shopping.lotuss.com/en/product/4-1-180-x-4-160083219,Lotus result showed Dutch Mill mixed berries 180ml x4 THB38.
+SKU0046,Lotus,competitor,38.00,pack,listing,2026-06-01,https://ppe-shopping.lotuss.com/en/product/dutch-mill-4in1-strawberry-drinking-yoghurt-180ml-x-4pcs-160083179,Lotus result showed Dutch Mill strawberry 180ml x4 THB38.

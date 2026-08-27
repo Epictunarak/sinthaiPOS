@@ -27,6 +27,7 @@ begin;
 -- ---------------------------------------------------------------------------
 -- 1. โหลด CSV เข้า staging ชั่วคราว (หายไปเองเมื่อจบ session)
 -- ---------------------------------------------------------------------------
+-- ลำดับคอลัมน์ต้องตรงกับ data/products_master.csv ที่ scripts/import_from_sheet.py สร้าง
 create temporary table stg_products (
     sku_code        text,
     legacy_sku_code text,
@@ -38,7 +39,6 @@ create temporary table stg_products (
     pack_size       numeric,
     pack_size_unit  text,
     pack_qty        integer,
-    pack_qty_source text,
     retail_price    numeric,
     active          text,
     data_flags      text
@@ -65,12 +65,13 @@ copy stg_vendor_prices from :'vendor_csv'   with (format csv, header true);
 --    จะมองว่าสินค้าหลายตัวมีบาร์โค้ดซ้ำกัน (คือ '') แล้ว insert ไม่ผ่าน
 -- ---------------------------------------------------------------------------
 insert into sinthai.products as p (
-    sku_code, barcode, brand, product_name,
+    sku_code, legacy_sku_code, barcode, brand, product_name,
     category, subcategory, pack_size, pack_size_unit, pack_qty,
     retail_price, is_active, data_flags, updated_at
 )
 select
     s.sku_code,
+    nullif(trim(s.legacy_sku_code), ''),
     nullif(trim(s.barcode), ''),
     s.brand,
     s.product_name,
@@ -85,6 +86,7 @@ select
     now()
 from stg_products s
 on conflict (sku_code) do update set
+    legacy_sku_code = excluded.legacy_sku_code,
     barcode        = excluded.barcode,
     brand          = excluded.brand,
     product_name   = excluded.product_name,
@@ -131,6 +133,8 @@ from (
     select sku_code, min(pack_equivalent_price) as cost_price
     from sinthai.vendor_price_pack_equivalent_view
     where vendor_role = 'supplier'
+      -- ราคาตัวอย่างที่ติดมากับเทมเพลตไม่ใช่ต้นทุนจริง (ดู 009)
+      and confidence <> 'template_sample'
     group by sku_code
 ) c
 where c.sku_code = p.sku_code;

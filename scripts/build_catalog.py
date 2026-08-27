@@ -72,6 +72,10 @@ def build():
 
         supplier_prices, competitor_prices = [], []
         for r in rows:
+            # ราคาที่ติดมากับเทมเพลตไม่ใช่ราคาที่สำรวจจริง เอามาคิดต้นทุนไม่ได้
+            # (ชีตติดสถานะ Verified ไว้ ทั้งที่หมายเหตุบอกเองว่าเป็นค่าตัวอย่าง)
+            if r["confidence"] == "template_sample":
+                continue
             eq = pack_equivalent(to_float(r["price"]), r["price_basis"], pack_qty)
             if eq is None:
                 continue
@@ -83,10 +87,23 @@ def build():
         cost_confidence = next((s["confidence"] for s in supplier_prices if s["price"] == cost), "")
         competitor_min = min((c["price"] for c in competitor_prices), default=None)
 
+        # ใช้ตั้งราคาได้เฉพาะราคาคู่แข่งที่ยืนยันว่าเป็นสินค้ารุ่นเดียวขนาดเดียวกันจริง
+        # ราคา comparable มักเป็นคนละขนาดบรรจุ (เคสจริง: BigC เค้ก 144 ก. ราคา 42
+        # ถูกเอาไปเทียบกับแพ็ค 17 ก. x12 = 204 ก. ซึ่งคิดต่อกรัมแล้ว Makro ถูกกว่า)
+        # ถ้าปล่อยให้ราคาแบบนั้นมากำหนดเพดาน ระบบจะแนะนำให้ "เปลี่ยนแหล่งซื้อ" ผิดๆ
+        competitor_ceiling = min(
+            (c["price"] for c in competitor_prices if c["confidence"] == "verified"),
+            default=None,
+        )
+
         issues = [f for f in (p["data_flags"] or "").split(";") if f]
         margin = margin_pct = suggested_retail = suggested_wholesale = None
 
-        if cost is not None:
+        if cost is not None and retail is None:
+            # รู้ต้นทุนแต่ยังไม่ได้ตั้งราคาขาย — เสนอราคาให้ แต่คำนวณกำไรไม่ได้
+            suggested_retail = round(cost * (1 + TARGET_RETAIL_MARGIN))
+            suggested_wholesale = round(cost * (1 + TARGET_WHOLESALE_MARGIN))
+        elif cost is not None:
             margin = retail - cost
             margin_pct = margin / cost
             if margin < 0:
@@ -95,14 +112,17 @@ def build():
                 issues.append("thin_margin")
 
             suggested_retail = round(cost * (1 + TARGET_RETAIL_MARGIN))
-            if competitor_min is not None:
-                ceiling = competitor_min * COMPETITOR_UNDERCUT
+            if competitor_ceiling is not None:
+                ceiling = competitor_ceiling * COMPETITOR_UNDERCUT
                 if ceiling < cost:
                     # คู่แข่งขายถูกกว่าต้นทุนเรา — สู้ราคาตรงๆ ไม่ได้
                     issues.append("cannot_beat_competitor_price")
                     suggested_retail = None
                 else:
                     suggested_retail = round(min(suggested_retail, ceiling))
+            elif competitor_min is not None:
+                # มีแต่ราคาคู่แข่งแบบไม่ตรงรุ่น — ใช้ตัดสินใจไม่ได้ ต้องไปตรวจของจริง
+                issues.append("competitor_price_not_comparable")
             suggested_wholesale = round(cost * (1 + TARGET_WHOLESALE_MARGIN))
         else:
             issues.append("NO_SUPPLIER_PRICE")
@@ -202,7 +222,7 @@ def write_outputs(catalog):
                 c["sku_code"], c["barcode"], c["product_name"], c["category"],
                 f'แพ็ค {c["pack_qty"]}' if c["pack_qty"] > 1 else c["unit"],
                 "" if c["cost_price"] is None else f'{c["cost_price"]:.2f}',
-                f'{c["retail_price"]:.2f}',
+                "" if c["retail_price"] is None else f'{c["retail_price"]:.2f}',
                 "" if c["suggested_wholesale_price"] is None else c["suggested_wholesale_price"],
                 5,
                 0,   # ยอดคงเหลือเริ่มต้น — ต้องตรวจนับของจริงก่อนเปิดใช้

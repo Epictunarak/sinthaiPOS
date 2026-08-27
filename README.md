@@ -4,17 +4,19 @@
 
 - **ใช้งานได้ทั้งมือถือ iOS และโน้ตบุ๊ก Windows** ผ่านเบราว์เซอร์ ในรูปแบบ PWA (ติดตั้งเป็นแอปได้
   จากปุ่ม "Add to Home Screen" บน iOS Safari หรือ "Install" บน Chrome/Edge) ไม่ต้องผ่าน App Store
-- **ใช้ Google Sheets เดิมของร้านเป็นฐานข้อมูลหลัก** ไม่ต้อง migrate ข้อมูลสินค้า 350 รายการไปที่ไหน
+- **เจ้าของร้านยังทำงานบน Google Sheet ที่คุ้นเคย** ระบบดึงข้อมูลจากชีตไปเข้าฐานข้อมูล
+  PostgreSQL (ต่อยอดจาก Phase 1) ให้เอง ไม่ต้องเปลี่ยนวิธีทำงานเดิม
 - **ต้นทุนต่ำที่สุด (ฟรี)** — Apps Script + GitHub Pages ล้วนอยู่ใน free tier
+- **เห็นกำไรต่อสินค้าทันที** โดยแยกราคา Makro (ต้นทุน) ออกจากราคา Lotus/BigC (คู่แข่ง)
 
 อ่านรายละเอียดสถาปัตยกรรมแบบเต็มได้ที่ [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ## โครงสร้างโปรเจกต์
 
 ```
-data/          ★ ต้นทางข้อมูลจริง (CSV ที่คนแก้ด้วยมือ) — ทุกอย่างสร้างจากที่นี่
+data/          สินค้าและราคาที่นำเข้าจาก Google Sheet (+ สแนปช็อตชีตต้นทาง)
 sql/           Migration ต่อยอด Phase 1 PostgreSQL (007+)
-scripts/       build_catalog.py — คำนวณต้นทุน/กำไร + สร้างไฟล์นำเข้า
+scripts/       import_from_sheet.py (ชีต→CSV) และ build_catalog.py (คำนวณกำไร)
 tests/         เทสต์ SQL migration และการนำเข้าข้อมูลบน PostgreSQL จริง
 apps-script/   Backend API (Google Apps Script ผูกกับ Google Sheet) — deploy ด้วย clasp
 web/           PWA frontend (Vite + vanilla JS) — หน้าขาย/สต็อก/รายงาน
@@ -22,15 +24,28 @@ docs/          เอกสารสถาปัตยกรรม, โครง
 ```
 
 > **อ่านก่อนเริ่ม:** [`docs/DATA_FINDINGS.md`](docs/DATA_FINDINGS.md) — สรุปสิ่งที่พบจาก
-> ข้อมูลราคาจริง รวมถึง **สินค้า 3 รายการที่กำลังขายต่ำกว่าทุน**
+> ข้อมูลจริง 141 รายการ รวมถึง **สินค้า 6 รายการที่กำลังขายต่ำกว่าทุน** และ
+> **130 รายการที่ยังไม่รู้ต้นทุน**
 
-## ฐานข้อมูลหลักคือ PostgreSQL
+## เส้นทางของข้อมูล
 
-`data/*.csv` คือต้นทาง → สร้างเป็นทั้งฐานข้อมูล PostgreSQL (Phase 1) และแผ่น Products
-ใน Google Sheet ที่ POS ใช้ **ไม่แก้ข้อมูลสินค้าใน Google Sheet โดยตรง** เพราะจะถูกเขียนทับ
-เหตุผลเต็มอยู่ใน [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+```
+Google Sheet "สินไทยพาณิชย์"  ← เจ้าของร้านแก้ที่นี่
+        │  import_from_sheet.py
+        ▼
+   data/*.csv                  ← อยู่ใน git ตรวจ diff ได้
+        │  build_catalog.py / sql/008
+        ├─────────────► PostgreSQL (sinthai)   ← ฐานข้อมูลหลักของระบบ
+        └─────────────► build/sheet_products.csv → แผ่น Products ที่ POS ใช้
+```
+
+แก้ข้อมูลสินค้าและราคาที่ **Google Sheet** เท่านั้น ไฟล์ CSV และแผ่น Products เป็นผลลัพธ์
+ที่ถูกสร้างใหม่ทุกรอบ เหตุผลเต็มอยู่ใน [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ```bash
+# นำเข้าข้อมูลจาก Google Sheet (ดาวน์โหลดชีตเป็น .xlsx ทับ data/source/ ก่อน)
+python3 scripts/import_from_sheet.py
+
 # ดูรายงานสุขภาพราคา (ต้นทุน / กำไร / รายการที่ขาดทุน)
 python3 scripts/build_catalog.py
 
@@ -39,6 +54,7 @@ python3 scripts/build_catalog.py --write
 
 # นำเข้าฐานข้อมูล PostgreSQL (ต่อจาก 001-006 ของ Phase 1)
 psql -U postgres -d sinthai -f sql/007_pos_extensions.sql
+psql -U postgres -d sinthai -f sql/009_template_sample_confidence.sql
 psql -U postgres -d sinthai \
   -v products_csv=/absolute/path/to/data/products_master.csv \
   -v vendor_csv=/absolute/path/to/data/vendor_prices.csv \
@@ -79,13 +95,13 @@ npm run dev
 
 ## การใช้งานประจำวัน
 
-- **แก้ไขสินค้า / เพิ่มสินค้าใหม่ / แก้ราคา** — แก้ที่ `data/products_master.csv` แล้วรัน
-  `python3 scripts/build_catalog.py --write` จากนั้นวาง `build/sheet_products.csv` ทับแผ่น
-  `Products` ในชีต ระบบ POS จะดึงค่าล่าสุดทุกครั้งที่เปิดแอป (และ cache ไว้ใช้ตอนออฟไลน์)
-  > อย่าแก้แผ่น `Products` ในชีตโดยตรง — จะถูกเขียนทับรอบถัดไป และทำให้ต้นทุน/กำไร
-  > หลุดจากราคาซัพพลายเออร์ที่บันทึกไว้
-- **บันทึกราคาซัพพลายเออร์/คู่แข่งที่สำรวจได้** — เพิ่มแถวใน `data/vendor_prices.csv`
-  พร้อมระบุ `vendor_role` และ URL อ้างอิง ต้นทุนกับกำไรจะคำนวณใหม่ให้เอง
+- **แก้ไขสินค้า / เพิ่มสินค้าใหม่ / แก้ราคา** — แก้ในชีต `SKU Price Comparison` ของ Google Sheet
+  แล้วรันขั้นตอน "เส้นทางของข้อมูล" ข้างบนใหม่
+- **บันทึกราคาซัพพลายเออร์/คู่แข่งที่สำรวจได้** — เพิ่มแถวในชีต `Reference` พร้อม URL อ้างอิง
+  และ Match Type ระบบจะแปลงเป็นระดับความน่าเชื่อถือแล้วคำนวณต้นทุน/กำไรให้เอง
+  > เก็บ **ราคา Makro ก่อนเสมอ** เพราะเป็นตัวเดียวที่บอกได้ว่าขายแล้วกำไรหรือขาดทุน
+  > ราคา Lotus/BigC บอกได้แค่เพดานราคาขาย
+- **อย่าแก้แผ่น `Products` ที่ POS ใช้โดยตรง** — เป็นผลลัพธ์ที่ถูกเขียนทับทุกรอบ
 - **ขายของตอนเน็ตหลุด** — ระบบยังกดขายได้ปกติ บิลจะถูกเก็บไว้ในเครื่อง (IndexedDB) แล้ว sync
   อัตโนมัติเมื่อเน็ตกลับมา
 - **ดูยอดขายรายวัน / สินค้าใกล้หมด** — ในแอป ไปที่แท็บ "รายงาน" และ "สต็อก"

@@ -124,7 +124,12 @@ join sinthai.products p on p.sku_code = v.sku_code;
 -- 4. View: สุขภาพราคาต่อสินค้า — ตัวเดียวกับที่ scripts/build_catalog.py คำนวณ
 --    มีทั้งสองที่เพราะ: สคริปต์ใช้ตอนยังไม่มี DB / view ใช้ตอนระบบรันจริง
 -- ---------------------------------------------------------------------------
-create or replace view sinthai.product_margin_view as
+-- drop ก่อนสร้างเสมอ ไม่ใช้ create or replace เพราะ migration รอบหลัง (009)
+-- เพิ่มคอลัมน์เข้ามาใน view นี้ ถ้ารัน 007 ซ้ำหลังจากนั้น create or replace
+-- จะ error ว่า "cannot drop columns from view"
+drop view if exists sinthai.product_margin_view;
+
+create view sinthai.product_margin_view as
 with pack_prices as (
     select * from sinthai.vendor_price_pack_equivalent_view
 ),

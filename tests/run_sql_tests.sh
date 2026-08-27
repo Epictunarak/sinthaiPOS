@@ -42,9 +42,13 @@ run -f "$ROOT/tests/phase1_reference_schema.sql"
 pass "phase1 fixture"
 
 echo "2. รัน migration 007"
-run -f "$ROOT/sql/007_pos_extensions.sql" >/dev/null
+for migration in 007_pos_extensions 009_template_sample_confidence; do
+    run -f "$ROOT/sql/$migration.sql" >/dev/null
+done
 pass "รันครั้งแรกผ่าน"
-run -f "$ROOT/sql/007_pos_extensions.sql" >/dev/null
+for migration in 007_pos_extensions 009_template_sample_confidence; do
+    run -f "$ROOT/sql/$migration.sql" >/dev/null
+done
 pass "รันซ้ำผ่าน (idempotent)"
 
 echo "3. นำเข้าข้อมูล"
@@ -56,8 +60,8 @@ seed() {
 seed
 products=$(scalar "select count(*) from sinthai.products;")
 vendors=$(scalar "select count(*) from sinthai.vendor_price_research;")
-[[ "$products" == "15" ]] || fail "ควรมีสินค้า 15 รายการ แต่ได้ $products"
-[[ "$vendors"  == "27" ]] || fail "ควรมีราคาผู้ขาย 27 แถว แต่ได้ $vendors"
+[[ "$products" == "141" ]] || fail "ควรมีสินค้า 141 รายการ แต่ได้ $products"
+[[ "$vendors"  == "56"  ]] || fail "ควรมีราคาผู้ขาย 56 แถว แต่ได้ $vendors"
 pass "นำเข้าสินค้า $products รายการ, ราคาผู้ขาย $vendors แถว"
 
 echo "4. นำเข้าซ้ำต้องไม่เกิดข้อมูลซ้ำ"
