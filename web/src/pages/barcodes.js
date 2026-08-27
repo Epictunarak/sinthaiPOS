@@ -1,7 +1,7 @@
 import { api } from '../api.js';
 import { cacheProducts, getCachedProducts } from '../db.js';
 import { getSession } from '../session.js';
-import { validateBarcode } from '../barcode.js';
+import { validateBarcode, isInternalBarcode, makeInternalBarcode } from '../barcode.js';
 
 /**
  * หน้าเก็บบาร์โค้ด — ใช้ตอนเดินสำรวจสินค้าในร้าน
@@ -100,6 +100,27 @@ export function renderBarcodes(container) {
       saving = false;
       draw();
     }
+  }
+
+  /**
+   * ออกบาร์โค้ดภายในให้สินค้าที่ไม่มีบาร์โค้ดจากโรงงาน (ของแบ่งขาย ของชั่งกิโล)
+   *
+   * เลขลำดับถัดไปดูจากบาร์โค้ดภายในที่มีอยู่แล้ว ไม่ใช่นับจากจำนวนสินค้า
+   * เพราะถ้าเคยลบสินค้าออกไป การนับจำนวนจะให้เลขที่เคยใช้แล้วซ้ำอีก
+   */
+  function generateInternal() {
+    const used = products
+      .map((p) => String(p.Barcode || '').trim())
+      .filter((code) => isInternalBarcode(code) && code.length === 13)
+      .map((code) => Number(code.slice(1, 12)))
+      .filter((n) => Number.isFinite(n));
+    const next = (used.length ? Math.max(...used) : 0) + 1;
+    input = makeInternalBarcode(next);
+    message = {
+      type: 'info',
+      text: `ออกรหัสภายใน ${input} แล้ว — ต้องพิมพ์สติกเกอร์ติดที่ตัวสินค้าด้วย ไม่งั้นยิงขายไม่ได้`
+    };
+    draw();
   }
 
   function stopScan() {
@@ -203,7 +224,10 @@ export function renderBarcodes(container) {
               </button>
               <button id="scan">เปิดกล้อง</button>
               <button id="cancel">ยกเลิก</button>
-            </div>`
+            </div>
+            <button id="internal" style="width:100%; margin-top:8px;">
+              สินค้าไม่มีบาร์โค้ดโรงงาน — ออกรหัสภายในร้าน
+            </button>`
           }
         </div>`
           : ''
@@ -267,6 +291,8 @@ export function renderBarcodes(container) {
     if (saveBtn) saveBtn.addEventListener('click', save);
     const scanBtn = container.querySelector('#scan');
     if (scanBtn) scanBtn.addEventListener('click', startScan);
+    const internalBtn = container.querySelector('#internal');
+    if (internalBtn) internalBtn.addEventListener('click', generateInternal);
     const stopBtn = container.querySelector('#stopScan');
     if (stopBtn) stopBtn.addEventListener('click', () => { stopScan(); draw(); });
     const cancelBtn = container.querySelector('#cancel');
