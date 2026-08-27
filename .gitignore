@@ -1,0 +1,10 @@
+node_modules/
+dist/
+web/.env
+web/.env.*.local
+.DS_Store
+*.log
+
+# clasp local auth (ห้าม commit เด็ดขาด — มี token เข้าถึงบัญชี Google)
+.clasprc.json
+apps-script/.clasp.json
