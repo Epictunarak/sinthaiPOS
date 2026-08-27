@@ -47,5 +47,6 @@ export const api = {
   getReport: (dateStr) => apiGet('report', { date: dateStr }),
   createSale: (sale) => apiPost('createSale', sale),
   adjustStock: (adjustment) => apiPost('adjustStock', adjustment),
-  setBarcode: (entry) => apiPost('setBarcode', entry)
+  setBarcode: (entry) => apiPost('setBarcode', entry),
+  countStock: (count) => apiPost('countStock', count)
 };

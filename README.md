@@ -16,7 +16,8 @@
 ```
 data/          สินค้าและราคาที่นำเข้าจาก Google Sheet (+ สแนปช็อตชีตต้นทาง)
 sql/           Migration ต่อยอด Phase 1 PostgreSQL (007+)
-scripts/       import_from_sheet.py (ชีต→CSV) และ build_catalog.py (คำนวณกำไร)
+scripts/       import_from_sheet.py (ชีต→CSV), build_catalog.py (คำนวณกำไร),
+               make_price_worklist.py (ใบงานเก็บราคา Makro)
 tests/         เทสต์ SQL migration และการนำเข้าข้อมูลบน PostgreSQL จริง
 apps-script/   Backend API (Google Apps Script ผูกกับ Google Sheet) — deploy ด้วย clasp
 web/           PWA frontend (Vite + vanilla JS) — หน้าขาย/สต็อก/รายงาน
@@ -54,6 +55,9 @@ python3 scripts/build_catalog.py
 
 # สร้างไฟล์นำเข้า → build/catalog_priced.csv และ build/sheet_products.csv
 python3 scripts/build_catalog.py --write
+
+# ใบงานเก็บราคา Makro (พิมพ์พกไปได้) → build/makro_worklist.html
+python3 scripts/make_price_worklist.py
 
 # นำเข้าฐานข้อมูล PostgreSQL (ต่อจาก 001-006 ของ Phase 1)
 psql -U postgres -d sinthai -f sql/007_pos_extensions.sql
@@ -107,6 +111,8 @@ npm run dev
 - **อย่าแก้แผ่น `Products` ที่ POS ใช้โดยตรง** — เป็นผลลัพธ์ที่ถูกเขียนทับทุกรอบ
 - **ขายของตอนเน็ตหลุด** — ระบบยังกดขายได้ปกติ บิลจะถูกเก็บไว้ในเครื่อง (IndexedDB) แล้ว sync
   อัตโนมัติเมื่อเน็ตกลับมา
+- **เก็บบาร์โค้ดสินค้า** — ในแอป ไปที่แท็บ "เก็บบาร์โค้ด" แล้วเดินยิงทีละตัว
+  ระบบตรวจหลักตรวจสอบให้ก่อนบันทึกทุกครั้ง จึงกันการยิงพลาด/พิมพ์ผิดได้
 - **ดูยอดขายรายวัน / สินค้าใกล้หมด** — ในแอป ไปที่แท็บ "รายงาน" และ "สต็อก"
 
 ## Roadmap (ยังไม่ทำในรอบนี้)

@@ -47,6 +47,8 @@ function doPost(e) {
         return jsonResponse_(handleAdjustStock_(payload));
       case 'setBarcode':
         return jsonResponse_(handleSetBarcode_(payload));
+      case 'countStock':
+        return jsonResponse_(handleCountStock_(payload));
       default:
         return errorResponse_('ไม่รู้จัก action: ' + body.action);
     }

@@ -6,12 +6,14 @@ import { renderPos } from './pages/pos.js';
 import { renderInventory } from './pages/inventory.js';
 import { renderReports } from './pages/reports.js';
 import { renderBarcodes } from './pages/barcodes.js';
+import { renderStocktake } from './pages/stocktake.js';
 
 const ROUTES = {
   '#/pos': { render: renderPos, label: 'ขายของ' },
   '#/inventory': { render: renderInventory, label: 'สต็อก' },
   '#/reports': { render: renderReports, label: 'รายงาน' },
-  '#/barcodes': { render: renderBarcodes, label: 'เก็บบาร์โค้ด' }
+  '#/barcodes': { render: renderBarcodes, label: 'เก็บบาร์โค้ด' },
+  '#/stocktake': { render: renderStocktake, label: 'ตรวจนับ' }
 };
 
 const app = document.getElementById('app');
