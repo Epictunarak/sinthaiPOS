@@ -12,9 +12,40 @@
 ## โครงสร้างโปรเจกต์
 
 ```
+data/          ★ ต้นทางข้อมูลจริง (CSV ที่คนแก้ด้วยมือ) — ทุกอย่างสร้างจากที่นี่
+sql/           Migration ต่อยอด Phase 1 PostgreSQL (007+)
+scripts/       build_catalog.py — คำนวณต้นทุน/กำไร + สร้างไฟล์นำเข้า
+tests/         เทสต์ SQL migration และการนำเข้าข้อมูลบน PostgreSQL จริง
 apps-script/   Backend API (Google Apps Script ผูกกับ Google Sheet) — deploy ด้วย clasp
 web/           PWA frontend (Vite + vanilla JS) — หน้าขาย/สต็อก/รายงาน
-docs/          เอกสารสถาปัตยกรรม + โครงสร้าง Sheet
+docs/          เอกสารสถาปัตยกรรม, โครงสร้าง Sheet, และผลตรวจข้อมูล
+```
+
+> **อ่านก่อนเริ่ม:** [`docs/DATA_FINDINGS.md`](docs/DATA_FINDINGS.md) — สรุปสิ่งที่พบจาก
+> ข้อมูลราคาจริง รวมถึง **สินค้า 3 รายการที่กำลังขายต่ำกว่าทุน**
+
+## ฐานข้อมูลหลักคือ PostgreSQL
+
+`data/*.csv` คือต้นทาง → สร้างเป็นทั้งฐานข้อมูล PostgreSQL (Phase 1) และแผ่น Products
+ใน Google Sheet ที่ POS ใช้ **ไม่แก้ข้อมูลสินค้าใน Google Sheet โดยตรง** เพราะจะถูกเขียนทับ
+เหตุผลเต็มอยู่ใน [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+
+```bash
+# ดูรายงานสุขภาพราคา (ต้นทุน / กำไร / รายการที่ขาดทุน)
+python3 scripts/build_catalog.py
+
+# สร้างไฟล์นำเข้า → build/catalog_priced.csv และ build/sheet_products.csv
+python3 scripts/build_catalog.py --write
+
+# นำเข้าฐานข้อมูล PostgreSQL (ต่อจาก 001-006 ของ Phase 1)
+psql -U postgres -d sinthai -f sql/007_pos_extensions.sql
+psql -U postgres -d sinthai \
+  -v products_csv=/absolute/path/to/data/products_master.csv \
+  -v vendor_csv=/absolute/path/to/data/vendor_prices.csv \
+  -f sql/008_seed_pos_catalog.sql
+
+# ทดสอบ migration + การนำเข้า (ต้องมี PostgreSQL ในเครื่อง)
+./tests/run_sql_tests.sh
 ```
 
 ## เริ่มต้นใช้งาน (ครั้งแรก)
@@ -48,8 +79,13 @@ npm run dev
 
 ## การใช้งานประจำวัน
 
-- **แก้ไขสินค้า / เพิ่มสินค้าใหม่ / แก้ราคา** — แก้ตรงในชีต `Products` ได้เลย ระบบ POS จะดึงค่า
-  ล่าสุดทุกครั้งที่เปิดแอป (และ cache ไว้ใช้ตอนออฟไลน์)
+- **แก้ไขสินค้า / เพิ่มสินค้าใหม่ / แก้ราคา** — แก้ที่ `data/products_master.csv` แล้วรัน
+  `python3 scripts/build_catalog.py --write` จากนั้นวาง `build/sheet_products.csv` ทับแผ่น
+  `Products` ในชีต ระบบ POS จะดึงค่าล่าสุดทุกครั้งที่เปิดแอป (และ cache ไว้ใช้ตอนออฟไลน์)
+  > อย่าแก้แผ่น `Products` ในชีตโดยตรง — จะถูกเขียนทับรอบถัดไป และทำให้ต้นทุน/กำไร
+  > หลุดจากราคาซัพพลายเออร์ที่บันทึกไว้
+- **บันทึกราคาซัพพลายเออร์/คู่แข่งที่สำรวจได้** — เพิ่มแถวใน `data/vendor_prices.csv`
+  พร้อมระบุ `vendor_role` และ URL อ้างอิง ต้นทุนกับกำไรจะคำนวณใหม่ให้เอง
 - **ขายของตอนเน็ตหลุด** — ระบบยังกดขายได้ปกติ บิลจะถูกเก็บไว้ในเครื่อง (IndexedDB) แล้ว sync
   อัตโนมัติเมื่อเน็ตกลับมา
 - **ดูยอดขายรายวัน / สินค้าใกล้หมด** — ในแอป ไปที่แท็บ "รายงาน" และ "สต็อก"

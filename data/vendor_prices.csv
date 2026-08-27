@@ -1,0 +1,28 @@
+sku_code,vendor,vendor_role,price,price_basis,confidence,checked_date,source_url,note
+SKU0001,Makro,supplier,14.50,unit,verified,2026-05-16,,ราคาต่อกระป๋องเดี่ยว ไม่ใช่ราคาลัง 24
+SKU0001,Lotus,competitor,15.00,unit,verified,2026-05-16,,ราคาต่อกระป๋องเดี่ยว
+SKU0001,BigC,competitor,15.00,unit,verified,2026-05-16,,ราคาต่อกระป๋องเดี่ยว
+SKU0002,Makro,supplier,19.00,unit,verified,2026-05-16,,ราคาต่อถุงเดี่ยว ไม่ใช่ราคาแพ็ค 6
+SKU0002,Lotus,competitor,20.00,unit,verified,2026-05-16,,ราคาต่อถุงเดี่ยว
+SKU0002,BigC,competitor,20.00,unit,verified,2026-05-16,,ราคาต่อถุงเดี่ยว
+SKU0003,Makro,supplier,49.00,pack,verified,2026-05-16,https://www.makro.pro/en/p/9zvr82iu-6761199173827,
+SKU0003,Lotus,competitor,55.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/singha-drinking-water-1500ml-x-6pcs-150146313,
+SKU0003,BigC,competitor,55.00,pack,verified,2026-05-16,https://www.bigc.co.th/product/sigha-water-1-5-l-pack-6.744,
+SKU0004,Lotus,competitor,341.00,pack,verified,2026-05-16,https://www.lotuss.com/en/product/coke-soft-drink-original-15l-x-12pcs-clubpack-168688528,
+SKU0004,BigC,competitor,330.00,pack,verified,2026-05-16,https://www.bigc.co.th/shop/coca-cola/group/shop-coca-cola-brand-coke,
+SKU0005,BigC,competitor,213.00,pack,comparable,2026-05-16,https://www.bigc.co.th/product/coca-cola-coke-soft-drink-original-taste-less-sugar-1-9-l-6-bottles-8851959629017.70904,เทียบจากขนาด 1.95L x6 ไม่ใช่ 2L x6 พอดี
+SKU0006,Makro,supplier,47.00,pack,listing,2026-05-16,https://www.makro.pro/en/c/search?q=NESTLE,เจอจากหน้า search ไม่ใช่หน้าสินค้าตรงรุ่น
+SKU0006,Lotus,competitor,55.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/nestl-pure-life-drinking-water-1500ml-x-6pcs-150223816,
+SKU0006,BigC,competitor,62.00,pack,listing,2026-05-16,https://www.bigc.co.th/shop/nestle/group/shop-nestle-brand-nestle-purelife,เจอจากหน้าแบรนด์ ไม่ใช่หน้าสินค้าตรงรุ่น
+SKU0007,Makro,supplier,47.00,pack,listing,2026-05-16,https://www.makro.pro/en/c/search?q=NESTLE,ค่าซ้ำกับ SKU0006 - น่าจะเป็นราคาจากหน้า search เดียวกัน ต้องตรวจใหม่
+SKU0007,BigC,competitor,62.00,pack,listing,2026-05-16,https://www.bigc.co.th/shop/nestle/group/shop-nestle-brand-nestle-purelife,ค่าซ้ำกับ SKU0006 - ต้องตรวจใหม่
+SKU0008,Lotus,competitor,375.00,pack,verified,2026-05-16,https://shopping.lotuss.com/en/product/168843247,Fanta fruit punch 1.5L x12
+SKU0008,BigC,competitor,336.00,pack,verified,2026-05-16,https://www.bigc.co.th/group/fanta-20250130,Fanta green/mixed fruit 1.5L x12
+SKU0009,BigC,competitor,299.00,pack,comparable,2026-05-16,https://www.bigc.co.th/shop/coca-cola/group/shop-coca-cola-brand-coke,เทียบจากขนาด 1L x12 ไม่ใช่ 999ml x12 พอดี
+SKU0010,Lotus,competitor,186.00,pack,verified,2026-05-16,https://www.lotuss.com/en/smartx/product/171322073,
+SKU0011,BigC,competitor,299.00,pack,comparable,2026-05-16,https://www.bigc.co.th/group/tnt-disc-20230810,เทียบจากขนาด 1L x12 ไม่ใช่ 999ml พอดี
+SKU0012,Lotus,competitor,186.00,pack,comparable,2026-05-16,,อ้างอิงราคาเดียวกับ Coke 500ml x12 - ต้องตรวจหน้าสินค้า Fanta จริง
+SKU0013,BigC,competitor,316.00,pack,verified,2026-05-16,,
+SKU0014,Makro,supplier,149.00,pack,verified,2026-05-16,,
+SKU0015,Makro,supplier,83.00,pack,verified,2026-05-16,,
+SKU0015,BigC,competitor,83.00,pack,verified,2026-05-16,,

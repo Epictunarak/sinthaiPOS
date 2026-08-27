@@ -1,0 +1,16 @@
+sku_code,legacy_sku_code,barcode,brand,product_name,category,subcategory,pack_size,pack_size_unit,pack_qty,pack_qty_source,retail_price,active,data_flags
+SKU0001,SKU001,8851959142011,Coca-Cola,Coke Original 325ml x 24 units,Beverage,Soft Drink,325,ml,24,product_name,325,TRUE,retail_price_equals_pack_size_verify
+SKU0002,SKU002,8850718801015,Lay's,Lay's Original 48g x 6 units,Snack,Potato Chips,48,g,6,product_name,100,TRUE,
+SKU0003,SKU0003,,SINGHA,SINGHA Drinking Water 1.5L Pack 6,Beverage,Drinking Water,1.5,L,6,product_name,50,TRUE,barcode_missing
+SKU0004,SKU0004,,Coca-Cola,Coke Original 1.5L x 12 units,Beverage,Soft Drink,1.5,L,12,product_name,340,TRUE,barcode_missing;no_supplier_price
+SKU0005,SKU0005,,Coca-Cola,Coke Original 2L x 6 units,Beverage,Soft Drink,2,L,6,product_name,230,TRUE,barcode_missing;no_supplier_price
+SKU0006,SKU0006,,NESTLE,NESTLE Pure Life Drinking Water 1.5L Pack 6,Beverage,Drinking Water,1.5,L,6,product_name,50,TRUE,barcode_missing
+SKU0007,SKU0007,,NESTLE,NESTLE Pure Life Drinking Water 600ml Pack 12,Beverage,Drinking Water,600,ml,12,product_name,50,TRUE,barcode_missing;unit_corrected_L_to_ml;supplier_price_duplicate_of_SKU0006
+SKU0008,SKU0008,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 1.5L x 12 units,Beverage,Soft Drink,1.5,L,12,inferred_from_price_note,340,TRUE,barcode_missing;no_supplier_price;pack_qty_inferred
+SKU0009,SKU0009,,Coca-Cola,Coke Original 999ml x 12 units,Beverage,Soft Drink,999,ml,12,product_name,260,TRUE,barcode_missing;no_supplier_price
+SKU0010,SKU0010,,Coca-Cola,Coke Original 500ml x 12 units,Beverage,Soft Drink,500,ml,12,product_name,185,TRUE,barcode_missing;no_supplier_price
+SKU0011,SKU0011,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 999ml x 12 units,Beverage,Soft Drink,999,ml,12,inferred_from_price_note,260,TRUE,barcode_missing;no_supplier_price;pack_qty_inferred
+SKU0012,SKU0012,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 500ml x 12 units,Beverage,Soft Drink,500,ml,12,inferred_from_price_note,185,TRUE,barcode_missing;no_supplier_price;pack_qty_inferred
+SKU0013,SKU0013,,FANTA,FANTA Mixed Fruit Flavored Soft Drink 325ml x 24 units,Beverage,Soft Drink,325,ml,24,product_name,325,TRUE,barcode_missing;no_supplier_price
+SKU0014,SKU0014,,Coca-Cola,Coke Original 240ml x 12 units,Beverage,Soft Drink,240,ml,12,product_name,132,TRUE,barcode_missing
+SKU0015,SKU0015,,SINGHA,SINGHA Lemon Soda 330ml x 6 units,Beverage,Soda,330,ml,6,product_name,85,TRUE,barcode_missing

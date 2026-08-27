@@ -8,3 +8,8 @@ web/.env.*.local
 # clasp local auth (ห้าม commit เด็ดขาด — มี token เข้าถึงบัญชี Google)
 .clasprc.json
 apps-script/.clasp.json
+
+# ผลลัพธ์ที่สร้างใหม่ได้เสมอจาก scripts/build_catalog.py
+build/
+__pycache__/
+*.pyc

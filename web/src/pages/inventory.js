@@ -2,6 +2,24 @@ import { api } from '../api.js';
 import { cacheProducts, getCachedProducts } from '../db.js';
 import { getSession } from '../session.js';
 
+/** ต้นทุนกับกำไรต่อหน่วยขาย — Cost ในชีตอาจว่างได้ถ้ายังไม่รู้ราคาซัพพลายเออร์ */
+function margin(product) {
+  const cost = product.Cost === '' || product.Cost === null || product.Cost === undefined
+    ? null
+    : Number(product.Cost);
+  const retail = Number(product.RetailPrice);
+  if (cost === null || !isFinite(cost) || cost <= 0) return { cost: null, value: null, pct: null };
+  return { cost, value: retail - cost, pct: (retail - cost) / cost };
+}
+
+function marginCell(m) {
+  if (m.pct === null) return '<span class="text-dim">—</span>';
+  const pct = (m.pct * 100).toFixed(1) + '%';
+  if (m.value < 0) return `<span class="badge danger">ขาดทุน ${pct}</span>`;
+  if (m.pct < 0.05) return `<span class="badge warning">${pct}</span>`;
+  return `<span class="badge ok">${pct}</span>`;
+}
+
 export function renderInventory(container) {
   const staff = getSession();
   let products = [];
@@ -78,25 +96,31 @@ export function renderInventory(container) {
         <div style="overflow-x:auto;">
           <table>
             <thead>
-              <tr><th>SKU</th><th>ชื่อสินค้า</th><th>คงเหลือ</th><th>จุดสั่งซื้อ</th><th>ปรับสต็อก</th></tr>
+              <tr>
+                <th>SKU</th><th>ชื่อสินค้า</th><th>คงเหลือ</th>
+                <th>ทุน</th><th>ขาย</th><th>กำไร</th><th>ปรับสต็อก</th>
+              </tr>
             </thead>
             <tbody>
               ${list
                 .map((p) => {
                   const low = Number(p.StockQty) <= Number(p.ReorderPoint);
+                  const m = margin(p);
                   return `
                 <tr class="${low ? 'low-stock' : ''}">
                   <td>${p.SKU}</td>
                   <td>${p.Name}</td>
                   <td>${p.StockQty} ${p.Unit || ''} ${low ? '<span class="badge warning">ใกล้หมด</span>' : ''}</td>
-                  <td>${p.ReorderPoint}</td>
+                  <td>${m.cost === null ? '<span class="text-dim">ยังไม่รู้</span>' : m.cost.toFixed(2)}</td>
+                  <td>${Number(p.RetailPrice).toFixed(2)}</td>
+                  <td>${marginCell(m)}</td>
                   <td>
                     <button data-adjust-minus="${p.SKU}">-1</button>
                     <button data-adjust-plus="${p.SKU}">+1</button>
                   </td>
                 </tr>`;
                 })
-                .join('') || '<tr><td colspan="5" class="text-dim">ไม่พบสินค้า</td></tr>'}
+                .join('') || '<tr><td colspan="7" class="text-dim">ไม่พบสินค้า</td></tr>'}
             </tbody>
           </table>
         </div>
