@@ -125,7 +125,10 @@ export function renderPos(container) {
           if (p) p.StockQty = Number(p.StockQty) - c.qty;
         });
         await cacheProducts(products);
-        message = { type: 'success', text: `ขายสำเร็จ #${result.saleId} ยอดรวม ${(sale.items.reduce((s, i) => s + i.qty * i.unitPrice, 0) - sale.discount).toFixed(2)} บาท` };
+        // อย่าพิมพ์เลขที่บิลถ้า server ไม่ได้ส่งกลับมา ไม่งั้นพนักงานจะเห็นคำว่า "undefined"
+        const total = (sale.items.reduce((s, i) => s + i.qty * i.unitPrice, 0) - sale.discount).toFixed(2);
+        const ref = result.saleId ? ` #${result.saleId}` : '';
+        message = { type: 'success', text: `ขายสำเร็จ${ref} ยอดรวม ${total} บาท` };
         cart = [];
         discount = 0;
       } else {

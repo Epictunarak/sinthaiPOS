@@ -220,7 +220,9 @@ def write_outputs(catalog):
         for c in catalog:
             w.writerow([
                 c["sku_code"], c["barcode"], c["product_name"], c["category"],
-                f'แพ็ค {c["pack_qty"]}' if c["pack_qty"] > 1 else c["unit"],
+                # หน่วยที่ "ขาย" ไม่ใช่หน่วยของขนาดบรรจุ — สินค้าที่ขายยกแพ็คนับเป็นแพ็ค
+                # ถ้าใส่ "แพ็ค 24" จะไปแสดงผลเป็น "24 แพ็ค 24" ในหน้าสต็อก
+                "แพ็ค" if c["pack_qty"] > 1 else (c["unit"] or "ชิ้น"),
                 "" if c["cost_price"] is None else f'{c["cost_price"]:.2f}',
                 "" if c["retail_price"] is None else f'{c["retail_price"]:.2f}',
                 "" if c["suggested_wholesale_price"] is None else c["suggested_wholesale_price"],
