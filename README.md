@@ -18,7 +18,7 @@ data/          สินค้าและราคาที่นำเข้�
 sql/           Migration ต่อยอด Phase 1 PostgreSQL (007+)
 scripts/       import_from_sheet.py (ชีต→CSV), build_catalog.py (คำนวณกำไร),
                make_price_worklist.py (ใบงานเก็บราคา Makro)
-tests/         เทสต์ SQL migration และการนำเข้าข้อมูลบน PostgreSQL จริง
+tests/         เทสต์ SQL migration, การนำเข้าข้อมูล, และ e2e ที่ขับแอปจริงในเบราว์เซอร์
 apps-script/   Backend API (Google Apps Script ผูกกับ Google Sheet) — deploy ด้วย clasp
 web/           PWA frontend (Vite + vanilla JS) — หน้าขาย/สต็อก/รายงาน
 docs/          เอกสารสถาปัตยกรรม, โครงสร้าง Sheet, และผลตรวจข้อมูล
@@ -69,6 +69,12 @@ psql -U postgres -d sinthai \
 
 # ทดสอบ migration + การนำเข้า (ต้องมี PostgreSQL ในเครื่อง)
 ./tests/run_sql_tests.sh
+
+# ทดสอบตรรกะฝั่งแอป
+cd web && npm test
+
+# ทดสอบโดยขับแอปจริงในเบราว์เซอร์ (ดู tests/e2e/README.md)
+node tests/e2e/mock-api.mjs   # แล้วรัน smoke.mjs ตามขั้นตอนในเอกสาร
 ```
 
 ## เริ่มต้นใช้งาน (ครั้งแรก)
