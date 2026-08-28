@@ -24,6 +24,8 @@ function doGet(e) {
         return jsonResponse_(handleGetProducts_());
       case 'report':
         return jsonResponse_(handleReport_(params.date));
+      case 'settings':
+        return jsonResponse_({ ok: true, settings: getSettings_() });
       default:
         return errorResponse_('ไม่รู้จัก action: ' + params.action);
     }

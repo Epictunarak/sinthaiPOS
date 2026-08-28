@@ -76,6 +76,19 @@ function updateRowFields_(sheet, rowIndex, fields) {
   });
 }
 
+/**
+ * อ่านชีต Settings เป็น object เดียว เช่น { ShopName: 'สินไทยพาณิชย์', ... }
+ * ใช้กับหัวใบเสร็จและข้อความท้ายบิล
+ */
+function getSettings_() {
+  var settings = {};
+  sheetToObjects_(getSheet_(SHEET_NAMES.SETTINGS)).forEach(function (row) {
+    var key = String(row.Key || '').trim();
+    if (key) settings[key] = row.Value;
+  });
+  return settings;
+}
+
 function jsonResponse_(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))

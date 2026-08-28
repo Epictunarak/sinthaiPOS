@@ -70,6 +70,13 @@ const server = http.createServer((req, res) => {
     switch (url.searchParams.get('action')) {
       case 'products':
         return send({ ok: true, products });
+      case 'settings':
+        return send({ ok: true, settings: {
+          ShopName: 'สินไทยพาณิชย์',
+          ShopAddress: '123 ถนนตัวอย่าง อ.เมือง',
+          ShopPhone: '02-000-0000',
+          ReceiptFooter: 'ขอบคุณที่อุดหนุนครับ'
+        } });
       case 'report':
         return send({
           ok: true,

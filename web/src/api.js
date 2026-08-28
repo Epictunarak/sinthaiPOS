@@ -44,6 +44,7 @@ export const api = {
   ping: () => apiGet('ping'),
   login: (pin) => apiPost('login', { pin }),
   getProducts: () => apiGet('products'),
+  getSettings: () => apiGet('settings'),
   getReport: (dateStr) => apiGet('report', { date: dateStr }),
   createSale: (sale) => apiPost('createSale', sale),
   adjustStock: (adjustment) => apiPost('adjustStock', adjustment),

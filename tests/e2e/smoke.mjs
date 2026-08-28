@@ -148,6 +148,14 @@ check('บันทึกการขายสำเร็จ', /ขายสำ
 check('ไม่แสดงคำว่า undefined ให้พนักงานเห็น', !/undefined/.test(saleMessage));
 check('ล้างตะกร้าหลังขายเสร็จ', (await page.locator('.cart-row').count()) === 0);
 
+console.log('\nใบเสร็จ');
+check('แสดงใบเสร็จหลังขายเสร็จ', (await page.locator('.receipt-preview').count()) > 0);
+const receipt = await text('.receipt-preview');
+check('ใบเสร็จมีชื่อร้านจากชีต Settings', /สินไทยพาณิชย์/.test(receipt));
+check('ใบเสร็จลงวันที่เป็นพุทธศักราช', /25\d\d/.test(receipt));
+check('ใบเสร็จหักส่วนลดถูกต้อง', /-25\.00/.test(receipt));
+check('ใบเสร็จมีรายการสินค้าที่ขาย', /×/.test(receipt));
+
 // ---------------------------------------------------------------------------
 check('ไม่มี JavaScript error ระหว่างทดสอบ', pageErrors.length === 0);
 if (pageErrors.length) console.log('   ', pageErrors.join(' | '));

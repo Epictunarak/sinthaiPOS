@@ -2,6 +2,7 @@ import { api } from '../api.js';
 import { cacheProducts, getCachedProducts, queueSale } from '../db.js';
 import { syncPendingSales } from '../sync.js';
 import { getSession } from '../session.js';
+import { receiptHtml, printReceipt } from '../receipt.js';
 
 export function renderPos(container) {
   const staff = getSession();
@@ -12,6 +13,8 @@ export function renderPos(container) {
   let paymentMethod = 'cash';
   let message = null; // { type, text }
   let checkingOut = false;
+  let settings = {};
+  let lastSale = null;   // เก็บบิลล่าสุดไว้ให้พิมพ์ซ้ำได้ เผื่อกระดาษติดหรือพิมพ์ไม่ติด
 
   async function loadProducts() {
     const cached = await getCachedProducts();
@@ -129,6 +132,11 @@ export function renderPos(container) {
         const total = (sale.items.reduce((s, i) => s + i.qty * i.unitPrice, 0) - sale.discount).toFixed(2);
         const ref = result.saleId ? ` #${result.saleId}` : '';
         message = { type: 'success', text: `ขายสำเร็จ${ref} ยอดรวม ${total} บาท` };
+        // เก็บสำเนาบิลไว้ (ไม่ใช่อ้างอิงตะกร้า เพราะตะกร้ากำลังจะถูกล้าง)
+        lastSale = {
+          sale: { ...sale, saleId: result.saleId, timestamp: new Date() },
+          items: sale.items.map((item) => ({ ...item }))
+        };
         cart = [];
         discount = 0;
       } else {
@@ -137,6 +145,12 @@ export function renderPos(container) {
     } catch {
       await queueSale(sale);
       message = { type: 'info', text: 'ออฟไลน์อยู่ — บันทึกบิลไว้ในเครื่องแล้ว จะ sync อัตโนมัติเมื่อเน็ตกลับมา' };
+      // ลูกค้าต้องได้บิลกลับไปแม้ร้านจะออฟไลน์อยู่ ใช้รหัสที่เครื่องสร้างเองไปก่อน
+      // แล้วค่อยตรงกับเลขที่บิลจริงตอน sync
+      lastSale = {
+        sale: { ...sale, timestamp: new Date(), offline: true },
+        items: sale.items.map((item) => ({ ...item }))
+      };
       cart = [];
       discount = 0;
     } finally {
@@ -149,6 +163,23 @@ export function renderPos(container) {
     const list = filteredProducts();
     container.innerHTML = `
       ${message ? `<div class="msg ${message.type}">${message.text}</div>` : ''}
+      ${
+        lastSale
+          ? `<div class="card" id="receiptCard">
+               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                 <strong style="flex:1;">ใบเสร็จบิลล่าสุด</strong>
+                 <button class="primary" id="printReceipt">พิมพ์ใบเสร็จ</button>
+                 <button id="closeReceipt">ปิด</button>
+               </div>
+               <div class="receipt-preview">${receiptHtml({
+                 sale: lastSale.sale,
+                 items: lastSale.items,
+                 settings,
+                 staffName: staff?.name || ''
+               })}</div>
+             </div>`
+          : ''
+      }
       <div class="grid-2">
         <div>
           <input id="search" placeholder="ค้นหาชื่อ/SKU หรือยิงบาร์โค้ด แล้วกด Enter" value="${search}" />
@@ -237,9 +268,36 @@ export function renderPos(container) {
 
     const checkoutBtn = container.querySelector('#checkout');
     if (checkoutBtn) checkoutBtn.addEventListener('click', checkout);
+
+    const printBtn = container.querySelector('#printReceipt');
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        printReceipt(receiptHtml({
+          sale: lastSale.sale,
+          items: lastSale.items,
+          settings,
+          staffName: staff?.name || ''
+        }));
+      });
+    }
+    const closeReceipt = container.querySelector('#closeReceipt');
+    if (closeReceipt) {
+      closeReceipt.addEventListener('click', () => { lastSale = null; draw(); });
+    }
+  }
+
+  async function loadSettings() {
+    if (!navigator.onLine) return;
+    try {
+      const result = await api.getSettings();
+      if (result.ok) settings = result.settings || {};
+    } catch {
+      /* ไม่มีชื่อร้านก็ยังพิมพ์ใบเสร็จได้ ใช้ค่าเริ่มต้นแทน */
+    }
   }
 
   draw();
   loadProducts();
+  loadSettings();
   syncPendingSales(() => loadProducts());
 }

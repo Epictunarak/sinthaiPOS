@@ -140,6 +140,40 @@ tr.low-stock td { color: var(--warning); }
 
 .text-dim { color: var(--text-dim); font-size: 0.9rem; }
 
+/* ตัวอย่างใบเสร็จบนหน้าจอ — แสดงบนพื้นขาวเหมือนกระดาษจริง เพื่อให้เห็นตรงกับที่จะพิมพ์ออกมา
+   (ตอนพิมพ์จริงใช้ CSS แยกใน receipt.js ที่ฝังไปกับ iframe) */
+.receipt-preview {
+  background: #fff;
+  color: #000;
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-top: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+.receipt-preview .shop { font-size: 15px; font-weight: 700; }
+.receipt-preview .head { text-align: center; margin-bottom: 6px; }
+.receipt-preview .meta {
+  font-size: 11px;
+  border-top: 1px dashed #000;
+  border-bottom: 1px dashed #000;
+  padding: 5px 0;
+  margin-bottom: 5px;
+}
+.receipt-preview table { width: 100%; border-collapse: collapse; }
+.receipt-preview td { padding: 3px 0; border: 0; color: #000; }
+.receipt-preview .unit { font-size: 10px; color: #444; }
+.receipt-preview .amount { text-align: right; white-space: nowrap; padding-left: 6px; }
+.receipt-preview .sums { border-top: 1px dashed #000; margin-top: 5px; padding-top: 5px; }
+.receipt-preview .sums .grand td {
+  font-size: 14px;
+  font-weight: 700;
+  border-top: 1px solid #000;
+  padding-top: 4px;
+}
+.receipt-preview .foot { text-align: center; margin-top: 8px; font-size: 11px; }
+
 /* บนจอมือถือ ตารางกินพื้นที่จนปุ่มคอลัมน์ขวาสุดหลุดออกนอกจอ ทั้งที่เป็นปุ่มหลัก
    (เช่นปุ่มบันทึกในหน้าตรวจนับ) บีบระยะห่างและขนาดฟอนต์ลงเพื่อให้ทุกคอลัมน์อยู่ในจอ */
 @media (max-width: 600px) {
