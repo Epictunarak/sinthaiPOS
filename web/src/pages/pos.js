@@ -11,6 +11,7 @@ export function renderPos(container) {
   let cart = []; // [{sku, name, unitPrice, qty, stockQty}]
   let discount = 0;
   let paymentMethod = 'cash';
+  let customerName = '';   // ลูกค้าขายส่งต้องมีชื่อบนบิล ส่วนขายปลีกหน้าร้านเว้นว่างได้
   let message = null; // { type, text }
   let checkingOut = false;
   let settings = {};
@@ -115,7 +116,8 @@ export function renderPos(container) {
       cashierId: staff?.userId || '',
       items: cart.map((c) => ({ sku: c.sku, productName: c.name, qty: c.qty, unitPrice: c.unitPrice })),
       discount: Number(discount) || 0,
-      paymentMethod
+      paymentMethod,
+      customerName: customerName.trim()
     };
 
     try {
@@ -139,6 +141,7 @@ export function renderPos(container) {
         };
         cart = [];
         discount = 0;
+        customerName = '';
       } else {
         message = { type: 'error', text: result.error || 'บันทึกการขายไม่สำเร็จ' };
       }
@@ -153,6 +156,7 @@ export function renderPos(container) {
       };
       cart = [];
       discount = 0;
+      customerName = '';
     } finally {
       checkingOut = false;
       draw();
@@ -218,6 +222,10 @@ export function renderPos(container) {
               : '<p class="text-dim">ยังไม่มีสินค้าในตะกร้า</p>'
           }
           <div style="margin-top:12px;">
+            <label class="text-dim">ชื่อลูกค้า (ใส่เมื่อขายส่ง)</label>
+            <input id="customerName" placeholder="เว้นว่างได้ถ้าขายปลีกหน้าร้าน" value="${customerName}" />
+          </div>
+          <div style="margin-top:12px;">
             <label class="text-dim">ส่วนลด (บาท)</label>
             <input id="discount" type="number" min="0" value="${discount}" />
           </div>
@@ -260,6 +268,11 @@ export function renderPos(container) {
     container.querySelectorAll('[data-qty-minus]').forEach((btn) => {
       btn.addEventListener('click', () => changeQty(btn.dataset.qtyMinus, -1));
     });
+
+    const customerInput = container.querySelector('#customerName');
+    if (customerInput) {
+      customerInput.addEventListener('input', (e) => { customerName = e.target.value; });
+    }
 
     const discountInput = container.querySelector('#discount');
     if (discountInput) discountInput.addEventListener('input', (e) => { discount = e.target.value; });

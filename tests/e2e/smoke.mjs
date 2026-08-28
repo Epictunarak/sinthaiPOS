@@ -140,6 +140,7 @@ await page.waitForTimeout(400);
 check('เพิ่มสินค้าเข้าตะกร้าได้', (await page.locator('.cart-row').count()) >= 1);
 
 await page.fill('#discount', '25');
+await page.fill('#customerName', 'ร้านป้าสมศรี');
 await page.waitForTimeout(200);
 await page.click('#checkout');
 await page.waitForTimeout(1000);
@@ -155,6 +156,9 @@ check('ใบเสร็จมีชื่อร้านจากชีต Set
 check('ใบเสร็จลงวันที่เป็นพุทธศักราช', /25\d\d/.test(receipt));
 check('ใบเสร็จหักส่วนลดถูกต้อง', /-25\.00/.test(receipt));
 check('ใบเสร็จมีรายการสินค้าที่ขาย', /×/.test(receipt));
+check('ใบเสร็จมีชื่อลูกค้าขายส่ง', /ร้านป้าสมศรี/.test(receipt));
+check('ล้างชื่อลูกค้าหลังปิดบิล ไม่ติดไปบิลถัดไป',
+      (await page.inputValue('#customerName')) === '');
 
 // ---------------------------------------------------------------------------
 console.log('\nรายงาน');
