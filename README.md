@@ -72,6 +72,9 @@ psql -U postgres -d sinthai \
 # ทดสอบ migration + การนำเข้า (ต้องมี PostgreSQL ในเครื่อง)
 ./tests/run_sql_tests.sh
 
+# ทดสอบตัวแปลงข้อมูลจากชีต (บาร์โค้ด, รหัส SKU, จำนวนต่อแพ็ค)
+python3 tests/test_import_from_sheet.py
+
 # ทดสอบตรรกะฝั่งแอป
 cd web && npm test
 
