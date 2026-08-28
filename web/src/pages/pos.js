@@ -173,6 +173,8 @@ export function renderPos(container) {
                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                  <strong style="flex:1;">ใบเสร็จบิลล่าสุด</strong>
                  <button class="primary" id="printReceipt">พิมพ์ใบเสร็จ</button>
+                 ${lastSale.sale.saleId && !lastSale.voided
+                     ? '<button class="danger" id="voidSale">ยกเลิกบิล</button>' : ''}
                  <button id="closeReceipt">ปิด</button>
                </div>
                <div class="receipt-preview">${receiptHtml({
@@ -293,6 +295,34 @@ export function renderPos(container) {
         }));
       });
     }
+    const voidBtn = container.querySelector('#voidSale');
+    if (voidBtn) {
+      voidBtn.addEventListener('click', async () => {
+        // ยืนยันก่อน เพราะยกเลิกแล้วคืนสต็อกทันที กดพลาดจะทำให้ยอดคงเหลือผิด
+        if (!window.confirm(`ยกเลิกบิล ${lastSale.sale.saleId} และคืนสินค้าเข้าสต็อก?`)) return;
+        voidBtn.disabled = true;
+        try {
+          const result = await api.voidSale({
+            saleId: lastSale.sale.saleId,
+            userId: staff?.userId || ''
+          });
+          if (result.ok) {
+            lastSale.voided = true;
+            message = {
+              type: 'success',
+              text: `ยกเลิกบิล ${result.saleId} แล้ว คืนสินค้าเข้าสต็อก ${result.itemsRestored} รายการ`
+            };
+            await loadProducts();   // ดึงยอดคงเหลือใหม่ ไม่ให้ตัวเลขบนจอค้างของเก่า
+          } else {
+            message = { type: 'error', text: result.error };
+          }
+        } catch {
+          message = { type: 'error', text: 'ต้องออนไลน์เพื่อยกเลิกบิล' };
+        }
+        draw();
+      });
+    }
+
     const closeReceipt = container.querySelector('#closeReceipt');
     if (closeReceipt) {
       closeReceipt.addEventListener('click', () => { lastSale = null; draw(); });

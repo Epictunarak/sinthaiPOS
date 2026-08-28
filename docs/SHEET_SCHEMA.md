@@ -39,7 +39,7 @@
 | Discount | number | ส่วนลด |
 | Total | number | ยอดสุทธิ |
 | PaymentMethod | text | cash / transfer / other |
-| Status | text | completed / voided |
+| Status | text | completed / voided (ยกเลิกแล้ว — ไม่ถูกนับในรายงาน แต่ยังเก็บไว้ตรวจย้อนหลัง) |
 
 ## 3. `SaleItems`
 | คอลัมน์ | ชนิด | คำอธิบาย |
@@ -57,7 +57,7 @@
 | Timestamp | datetime | เวลาที่เคลื่อนไหวสต็อก |
 | SKU | text | อ้างอิง Products.SKU |
 | ChangeQty | number | ค่าติดลบ = ตัดสต็อก (ขาย), ค่าบวก = รับเข้า/ปรับเพิ่ม |
-| Reason | text | sale / restock / adjustment / stocktake (ตรวจนับ) |
+| Reason | text | sale / restock / adjustment / stocktake (ตรวจนับ) / void (ยกเลิกบิล) |
 | RefSaleID | text | ถ้ามาจากการขาย ใส่ SaleID |
 | UserId | text | ใครเป็นคนทำรายการ |
 

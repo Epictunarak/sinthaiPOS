@@ -49,5 +49,6 @@ export const api = {
   createSale: (sale) => apiPost('createSale', sale),
   adjustStock: (adjustment) => apiPost('adjustStock', adjustment),
   setBarcode: (entry) => apiPost('setBarcode', entry),
-  countStock: (count) => apiPost('countStock', count)
+  countStock: (count) => apiPost('countStock', count),
+  voidSale: (entry) => apiPost('voidSale', entry)
 };

@@ -60,6 +60,8 @@ const context = await browser.newContext({
   hasTouch: true
 });
 const page = await context.newPage();
+// ยืนยัน confirm() อัตโนมัติ — การยกเลิกบิลถามยืนยันก่อนเสมอ
+page.on('dialog', (dialog) => dialog.accept());
 
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
@@ -160,6 +162,13 @@ check('ใบเสร็จมีชื่อลูกค้าขายส่�
 check('ล้างชื่อลูกค้าหลังปิดบิล ไม่ติดไปบิลถัดไป',
       (await page.inputValue('#customerName')) === '');
 
+console.log('\nยกเลิกบิล');
+check('มีปุ่มยกเลิกบิลบนใบเสร็จ', (await page.locator('#voidSale').count()) > 0);
+await page.click('#voidSale');
+await page.waitForTimeout(1200);
+check('ยกเลิกแล้วคืนสินค้าเข้าสต็อก', /ยกเลิกบิล .* แล้ว/.test(await text('.msg')));
+check('ปุ่มยกเลิกหายไปหลังยกเลิกแล้ว', (await page.locator('#voidSale').count()) === 0);
+
 // ---------------------------------------------------------------------------
 console.log('\nรายงาน');
 await page.goto(`${BASE}#/reports`);
@@ -170,6 +179,16 @@ check('แสดงกำไรขั้นต้น ไม่ใช่แค่
 check('บอกตรงๆ ว่ากำไรครอบคลุมยอดขายกี่เปอร์เซ็นต์', /% ของยอดขาย/.test(reportText));
 check('มีตารางสินค้าขายดี', /ขายดีที่สุด/.test(reportText));
 check('สินค้าที่ยังไม่รู้ต้นทุนไม่ถูกนับกำไรเป็นศูนย์', /ยังไม่รู้ทุน/.test(reportText));
+check('รายงานแสดงรายการบิลของวันนั้น', (await page.locator('[data-void]').count()) >= 2);
+
+await page.locator('[data-void]').nth(1).click();
+await page.waitForTimeout(1300);
+const voidButtons = await page.locator('[data-void]:not([disabled])').count();
+check('ยกเลิกจากรายงานแล้วปุ่มไม่ค้างเป็น disabled', voidButtons >= 1);
+
+await page.locator('[data-void]').nth(1).click();
+await page.waitForTimeout(1200);
+check('ปฏิเสธการยกเลิกบิลเดิมซ้ำ', /ถูกยกเลิกไปแล้ว/.test(await text('.msg.error')));
 
 // ---------------------------------------------------------------------------
 check('ไม่มี JavaScript error ระหว่างทดสอบ', pageErrors.length === 0);

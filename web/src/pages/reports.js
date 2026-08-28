@@ -1,5 +1,6 @@
 import { api } from '../api.js';
 import { money } from '../receipt.js';
+import { getSession } from '../session.js';
 
 function todayStr() {
   const d = new Date();
@@ -14,7 +15,9 @@ function todayStr() {
  * ทั้งที่กำลังขาดทุน หน้านี้จึงแสดงกำไรขั้นต้นคู่กับคำเตือนว่ามีสินค้าไหนขายขาดทุนไปบ้าง
  */
 export function renderReports(container) {
+  const staff = getSession();
   let date = todayStr();
+  let voiding = null;
   let report = null;
   let loading = false;
   let error = null;
@@ -95,6 +98,28 @@ export function renderReports(container) {
           ${stat('ส่วนลดรวม', `${money(report.totalDiscount)} บาท`)}
         </div>
         <div class="card">
+          <h3 style="margin-top:0;">บิลของวันนี้</h3>
+          ${
+            (report.bills || []).length
+              ? `<div style="overflow-x:auto;"><table>
+                   <thead><tr><th>เวลา</th><th>บิล</th><th>ยอด</th><th></th></tr></thead>
+                   <tbody>
+                     ${report.bills.map((b) => `
+                       <tr>
+                         <td>${b.time}</td>
+                         <td>${b.saleId}${b.customerName ? `<br/><span class="text-dim">${b.customerName}</span>` : ''}</td>
+                         <td>${money(b.total)}</td>
+                         <td><button class="danger" data-void="${b.saleId}" ${voiding === b.saleId ? 'disabled' : ''}>
+                           ${voiding === b.saleId ? '...' : 'ยกเลิก'}
+                         </button></td>
+                       </tr>`).join('')}
+                   </tbody>
+                 </table></div>
+                 <p class="text-dim">ยกเลิกบิลแล้วสินค้าจะถูกคืนเข้าสต็อกอัตโนมัติ และบิลยังอยู่ในระบบให้ตรวจย้อนหลังได้</p>`
+              : '<p class="text-dim">ยังไม่มีบิลในวันนี้</p>'
+          }
+        </div>
+        <div class="card">
           <h3 style="margin-top:0;">ขายดีที่สุดวันนี้</h3>
           ${
             top.length
@@ -123,6 +148,35 @@ export function renderReports(container) {
     container.querySelector('#date').addEventListener('change', (e) => {
       date = e.target.value;
       load();
+    });
+
+    container.querySelectorAll('[data-void]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const saleId = btn.dataset.void;
+        if (!window.confirm(`ยกเลิกบิล ${saleId} และคืนสินค้าเข้าสต็อก?`)) return;
+        voiding = saleId;
+        draw();
+        let failure = null;
+        try {
+          const result = await api.voidSale({ saleId, userId: staff?.userId || '' });
+          if (!result.ok) failure = result.error;
+        } catch {
+          failure = 'ต้องออนไลน์เพื่อยกเลิกบิล';
+        } finally {
+          // ต้องล้างเสมอ ไม่ใช่เฉพาะตอนพลาด ไม่งั้นปุ่มของบิลนั้นจะค้างเป็น disabled ถาวร
+          // และกดยกเลิกบิลนั้นซ้ำไม่ได้อีกเลยจนกว่าจะรีเฟรชหน้า
+          voiding = null;
+        }
+
+        if (failure) {
+          error = failure;
+          draw();
+          return;
+        }
+        // โหลดรายงานใหม่ ไม่แก้ตัวเลขเองในหน้าจอ เพราะยอดขาย กำไร และสินค้าขายดี
+        // ล้วนต้องคิดใหม่ทั้งชุดเมื่อบิลหายไปหนึ่งใบ
+        await load();
+      });
     });
   }
 

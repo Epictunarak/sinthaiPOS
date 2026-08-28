@@ -98,6 +98,73 @@ function handleCreateSale_(payload) {
 }
 
 /**
+ * ยกเลิกบิล และคืนสต็อกกลับเข้าระบบ
+ *
+ * พนักงานกดขายผิดเป็นเรื่องปกติที่หน้าเคาน์เตอร์ ถ้าแก้ไม่ได้ สต็อกจะเพี้ยนสะสมไปเรื่อยๆ
+ * จนตัวเลขคงเหลือใช้ไม่ได้ทั้งระบบ
+ *
+ * ไม่ลบแถวบิลทิ้ง แต่เปลี่ยนสถานะเป็น voided เพื่อให้ตรวจย้อนหลังได้ว่าเคยมีบิลนี้
+ * และใครเป็นคนยกเลิก การคืนสต็อกก็บันทึกเป็น StockMovements เหมือนทุกการเคลื่อนไหว
+ *
+ * payload = { saleId, userId }
+ */
+function handleVoidSale_(payload) {
+  var saleId = String(payload.saleId || '').trim();
+  if (!saleId) return { ok: false, error: 'ต้องระบุ saleId' };
+
+  return withLock_(function () {
+    var salesSheet = getSheet_(SHEET_NAMES.SALES);
+    var rowIndex = findRowIndexByKey_(salesSheet, 'SaleID', saleId);
+    if (rowIndex === -1) return { ok: false, error: 'ไม่พบบิล ' + saleId };
+
+    var sale = sheetToObjects_(salesSheet).filter(function (s) {
+      return String(s.SaleID) === saleId;
+    })[0];
+
+    // กันกดยกเลิกซ้ำ ไม่งั้นสต็อกจะถูกคืนสองรอบ
+    if (sale && sale.Status === 'voided') {
+      return { ok: false, error: 'บิลนี้ถูกยกเลิกไปแล้ว' };
+    }
+
+    var items = sheetToObjects_(getSheet_(SHEET_NAMES.SALE_ITEMS)).filter(function (item) {
+      return String(item.SaleID) === saleId;
+    });
+    if (!items.length) return { ok: false, error: 'ไม่พบรายการสินค้าของบิลนี้' };
+
+    var productsSheet = getSheet_(SHEET_NAMES.PRODUCTS);
+    var headers = productsSheet.getRange(1, 1, 1, productsSheet.getLastColumn()).getValues()[0];
+    var stockColIndex = headers.indexOf('StockQty');
+    var movementsSheet = getSheet_(SHEET_NAMES.STOCK_MOVEMENTS);
+    var now = new Date();
+    var restored = 0;
+
+    items.forEach(function (item) {
+      var sku = String(item.SKU).trim();
+      var qty = Number(item.Qty) || 0;
+      var productRow = findRowIndexByKey_(productsSheet, 'SKU', sku);
+      // สินค้าอาจถูกลบออกจากแคตตาล็อกไปแล้ว — ยังต้องยกเลิกบิลได้ แค่คืนสต็อกตัวนั้นไม่ได้
+      if (productRow !== -1) {
+        var current = Number(productsSheet.getRange(productRow, stockColIndex + 1).getValue()) || 0;
+        updateRowFields_(productsSheet, productRow, { StockQty: current + qty });
+        restored++;
+      }
+      appendObject_(movementsSheet, {
+        Timestamp: now,
+        SKU: sku,
+        ChangeQty: qty,
+        Reason: 'void',
+        RefSaleID: saleId,
+        UserId: payload.userId || ''
+      });
+    });
+
+    updateRowFields_(salesSheet, rowIndex, { Status: 'voided' });
+
+    return { ok: true, saleId: saleId, itemsRestored: restored, itemCount: items.length };
+  });
+}
+
+/**
  * สรุปยอดขายของวันที่ระบุ (YYYY-MM-DD)
  *
  * รายงานนี้บอก "กำไร" ไม่ใช่แค่ "ยอดขาย" เพราะยอดขายสูงไม่ได้แปลว่าได้กำไร
@@ -174,12 +241,23 @@ function handleReport_(dateStr) {
   var topSellers = products.slice().sort(function (a, b) { return b.qty - a.qty; }).slice(0, 10);
   var losers = products.filter(function (p) { return p.soldBelowCost; });
 
+  var bills = sales.map(function (s) {
+    return {
+      saleId: s.SaleID,
+      time: Utilities.formatDate(new Date(s.Timestamp), 'Asia/Bangkok', 'HH:mm'),
+      customerName: s.CustomerName || '',
+      total: Number(s.Total) || 0,
+      paymentMethod: s.PaymentMethod || ''
+    };
+  }).reverse();   // บิลล่าสุดขึ้นก่อน เพราะบิลที่เพิ่งกดผิดคือบิลที่ต้องแก้บ่อยที่สุด
+
   return {
     ok: true,
     date: dateStr,
     orderCount: sales.length,
     totalSales: totalSales,
     totalDiscount: totalDiscount,
+    bills: bills,
     // กำไรขั้นต้นนับเฉพาะส่วนที่รู้ต้นทุน จึงต้องรายงานคู่กับสัดส่วนที่ยังไม่รู้เสมอ
     grossProfit: revenueWithKnownCost - costOfGoodsSold,
     revenueWithKnownCost: revenueWithKnownCost,

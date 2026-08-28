@@ -56,6 +56,9 @@ const products = lines.slice(1).map((line) => {
 const knownCosts = { SKU0014: 149, SKU0016: 51, SKU0023: 48, SKU0003: 49, SKU0006: 47 };
 products.forEach((p) => { if (knownCosts[p.SKU]) p.Cost = knownCosts[p.SKU]; });
 
+// จำบิลที่ถูกยกเลิกไว้ เพื่อให้ทดสอบได้ว่ากดยกเลิกซ้ำแล้วระบบปฏิเสธจริง
+const voidedSales = new Set();
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const send = (payload) => {
@@ -93,6 +96,10 @@ const server = http.createServer((req, res) => {
             { sku: 'SKU0003', name: 'SINGHA Drinking Water 1.5L Pack 6', qty: 7, revenue: 350, profit: 7, soldBelowCost: false },
             { sku: 'SKU0009', name: 'Coke Original 999ml x 12 units', qty: 4, revenue: 1040, profit: null, soldBelowCost: false }
           ],
+          bills: [
+            { saleId: 'SALE_TEST_1', time: '13:40', customerName: 'ร้านป้าสมศรี', total: 650, paymentMethod: 'cash' },
+            { saleId: 'SALE_TEST_2', time: '11:02', customerName: '', total: 120, paymentMethod: 'cash' }
+          ],
           soldBelowCost: [
             { sku: 'SKU0016', name: 'ยูโร่ คัสตาร์ดเค้ก 17 ก. 12 ชิ้น', qty: 9, revenue: 450, profit: -9, soldBelowCost: true }
           ]
@@ -110,9 +117,18 @@ const server = http.createServer((req, res) => {
       case 'login':
         return send({ ok: true, staff: { userId: 'U1', name: 'เจ้าของร้าน', role: 'owner' } });
       case 'createSale':
-        return send({ ok: true, saleId: 'SALE_TEST_1', total: 0 });
+        // ออกเลขบิลไม่ซ้ำเหมือนของจริง ไม่งั้นทดสอบยกเลิกบิลรอบสองจะไปชนบิลเดิม
+        // ที่ถูกยกเลิกไปแล้วในรอบก่อน
+        return send({ ok: true, saleId: `SALE_${Date.now()}`, total: 0 });
       case 'setBarcode':
         return send({ ok: true, sku: payload.sku, barcode: payload.barcode });
+      case 'voidSale': {
+        if (voidedSales.has(payload.saleId)) {
+          return send({ ok: false, error: 'บิลนี้ถูกยกเลิกไปแล้ว' });
+        }
+        voidedSales.add(payload.saleId);
+        return send({ ok: true, saleId: payload.saleId, itemsRestored: 2, itemCount: 2 });
+      }
       case 'countStock':
         return send({
           ok: true,
