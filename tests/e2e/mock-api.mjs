@@ -124,6 +124,12 @@ const server = http.createServer((req, res) => {
         // ออกเลขบิลไม่ซ้ำเหมือนของจริง ไม่งั้นทดสอบยกเลิกบิลรอบสองจะไปชนบิลเดิม
         // ที่ถูกยกเลิกไปแล้วในรอบก่อน
         return send({ ok: true, saleId: `SALE_${Date.now()}`, total: 0 });
+      case 'adjustStock': {
+        const product = products.find((p) => p.SKU === payload.sku);
+        if (!product) return send({ ok: false, error: `ไม่พบสินค้า ${payload.sku}` });
+        product.StockQty = Number(product.StockQty) + Number(payload.changeQty);
+        return send({ ok: true, sku: payload.sku, stockQty: product.StockQty });
+      }
       case 'setBarcode':
         return send({ ok: true, sku: payload.sku, barcode: payload.barcode });
       case 'voidSale': {

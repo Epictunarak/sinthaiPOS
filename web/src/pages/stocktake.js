@@ -1,6 +1,7 @@
 import { api } from '../api.js';
 import { cacheProducts, getCachedProducts } from '../db.js';
 import { getSession } from '../session.js';
+import { applyStockQty } from '../stock.js';
 
 /**
  * หน้าตรวจนับสต็อก — ใช้ตอนเปิดร้านครั้งแรก และตอนนับรอบประจำ
@@ -75,7 +76,7 @@ export function renderStocktake(container) {
       });
       if (result.ok) {
         const local = products.find((p) => p.SKU === sku);
-        if (local) local.StockQty = result.stockQty;
+        applyStockQty(local, result.stockQty);
         await cacheProducts(products);
         countedThisSession.add(sku);
         delete counts[sku];

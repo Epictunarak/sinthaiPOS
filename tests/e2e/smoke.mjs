@@ -146,6 +146,8 @@ await page.locator('[data-receive]').first().fill('24');
 await page.locator('[data-add]').first().click();
 await page.waitForTimeout(900);
 check('บันทึกการรับของเข้าสต็อก', /รับ .* เข้า 24/.test(await text('.msg')));
+// เคยเป็นบั๊กจริง: ยอดกลายเป็น undefined แล้วถูกนับว่าสินค้าหมด จนสั่งซื้อซ้ำโดยไม่จำเป็น
+check('ไม่มีคำว่า undefined โผล่บนหน้าสั่งซื้อ', !/undefined/.test(await text('main')));
 
 await page.locator('[data-receive]').nth(1).fill('0');
 await page.locator('[data-add]').nth(1).click();

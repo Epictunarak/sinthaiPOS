@@ -1,6 +1,7 @@
 import { api } from '../api.js';
 import { cacheProducts, getCachedProducts } from '../db.js';
 import { getSession } from '../session.js';
+import { applyStockQty } from '../stock.js';
 
 /** ต้นทุนกับกำไรต่อหน่วยขาย — Cost ในชีตอาจว่างได้ถ้ายังไม่รู้ราคาซัพพลายเออร์ */
 function margin(product) {
@@ -69,9 +70,9 @@ export function renderInventory(container) {
       const result = await api.adjustStock({ sku, changeQty: delta, reason, userId: staff?.userId || '' });
       if (result.ok) {
         const p = products.find((pr) => pr.SKU === sku);
-        if (p) p.StockQty = result.stockQty;
+        applyStockQty(p, result.stockQty);
         await cacheProducts(products);
-        message = { type: 'success', text: `ปรับสต็อก ${sku} เป็น ${result.stockQty} แล้ว` };
+        message = { type: 'success', text: `ปรับสต็อก ${sku} เป็น ${p?.StockQty ?? '-'} แล้ว` };
       } else {
         message = { type: 'error', text: result.error };
       }
