@@ -17,7 +17,7 @@
 data/          สินค้าและราคาที่นำเข้าจาก Google Sheet (+ สแนปช็อตชีตต้นทาง)
 sql/           Migration ต่อยอด Phase 1 PostgreSQL (007+)
 scripts/       import_from_sheet.py (ชีต→CSV), build_catalog.py (คำนวณกำไร),
-               make_price_worklist.py (ใบงานเก็บราคา Makro)
+               make_worklists.py (ใบงานเก็บราคา Makro + ใบงานเติมข้อมูลที่ขาด)
 tests/         เทสต์ SQL migration, การนำเข้าข้อมูล, และ e2e ที่ขับแอปจริงในเบราว์เซอร์
 apps-script/   Backend API (Google Apps Script ผูกกับ Google Sheet) — deploy ด้วย clasp
 web/           PWA frontend (Vite + vanilla JS) — หน้าขาย/สต็อก/รายงาน
@@ -56,8 +56,10 @@ python3 scripts/build_catalog.py
 # สร้างไฟล์นำเข้า → build/catalog_priced.csv และ build/sheet_products.csv
 python3 scripts/build_catalog.py --write
 
-# ใบงานเก็บราคา Makro (พิมพ์พกไปได้) → build/makro_worklist.html
-python3 scripts/make_price_worklist.py
+# ใบงานเก็บข้อมูลที่ขาด (พิมพ์พกไปได้)
+#   → build/makro_worklist.html  ราคา Makro 130 รายการที่ยังไม่รู้ต้นทุน
+#   → build/data_gaps.html       ราคาขายที่ขาด + ต้นทุนที่ต้องตรวจซ้ำ + จำนวนต่อแพ็คที่เดา
+python3 scripts/make_worklists.py
 
 # นำเข้าฐานข้อมูล PostgreSQL (ต่อจาก 001-006 ของ Phase 1)
 psql -U postgres -d sinthai -f sql/007_pos_extensions.sql

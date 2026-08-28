@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 """
-make_price_worklist.py — สร้างใบงานสำหรับเดินเก็บราคา Makro
+make_worklists.py — สร้างใบงานสำหรับเก็บข้อมูลที่ยังขาด
 
-ปัญหาที่แก้: สินค้า 130 จาก 141 รายการยังไม่รู้ต้นทุน จึงไม่รู้ว่าขายแล้วกำไรหรือขาดทุน
-การไล่เก็บราคาทีละตัวโดยไม่มีลำดับจะเสียเวลามาก สคริปต์นี้จัดลำดับให้ว่าควรเก็บตัวไหนก่อน
-โดยใช้หลักฐานจากข้อมูลของร้านเอง
+ข้อมูลของร้านยังมีช่องว่างหลายจุดที่ทำให้ระบบทำงานได้ไม่เต็มที่ ตั้งแต่ระดับ
+"ขายไม่ได้เลย" ไปจนถึง "ขายได้แต่ไม่รู้ว่ากำไรหรือขาดทุน" สคริปต์นี้แยกเป็นใบงานตามงาน
+ที่ต้องไปทำจริง พร้อมจัดลำดับความสำคัญให้
 
-เกณฑ์จัดลำดับ (จากสำคัญมากไปน้อย):
+ใบงานที่สร้าง:
+  1. ราคาขายที่ยังไม่มี      — สินค้าเหล่านี้ POS ขายไม่ได้เลย ต้องเติมก่อนอย่างอื่น
+  2. ราคา Makro ที่ยังขาด    — ไม่มีก็ไม่รู้ว่าขายแล้วกำไรหรือขาดทุน
+  3. ต้นทุนที่ต้องตรวจซ้ำ    — มีราคาแล้วแต่ยังไม่ยืนยันว่าตรงรุ่นตรงขนาด
+  4. จำนวนต่อแพ็คที่ระบบเดา  — ถ้าเดาผิด ตัวเลขกำไรจะผิดตามทั้งหมด
+
+เกณฑ์จัดลำดับของใบงานราคา Makro (จากสำคัญมากไปน้อย):
 
   1. แบรนด์ที่พบแล้วว่ามีสินค้าขายต่ำกว่าทุน
      ยูโร่เป็นตัวอย่างจริง: พอรู้ต้นทุน 5 จาก 8 ตัวก็พบว่าขาดทุนทันที
@@ -19,11 +25,12 @@ make_price_worklist.py — สร้างใบงานสำหรับเ�
   3. ราคาขายสูง — ผิดพลาดทีนึงเสียเงินเยอะกว่า
 
 ผลลัพธ์:
-  build/makro_worklist.csv   คอลัมน์ตรงกับชีต Reference วางแปะกลับได้เลย
-  build/makro_worklist.html  เปิดพิมพ์ใส่กระดาษพกไป Makro หรือเปิดบนมือถือ
+  build/makro_worklist.csv    คอลัมน์ตรงกับชีต Reference วางแปะกลับได้เลย
+  build/makro_worklist.html   ใบงานเก็บราคา Makro (พิมพ์พกไปได้)
+  build/data_gaps.html        ใบงานช่องว่างข้อมูลอื่นๆ ทั้งหมด
 
 การใช้งาน:
-    python3 scripts/make_price_worklist.py
+    python3 scripts/make_worklists.py
 """
 
 import csv
@@ -190,6 +197,126 @@ def write_html(rows, suspect_brands, flat_groups):
     return path
 
 
+def collect_gaps():
+    """รวบรวมช่องว่างข้อมูลที่ไม่ใช่เรื่อง "ยังไม่มีราคา Makro" """
+    products = load_rows("products_master.csv")
+    vendor_prices = load_rows("vendor_prices.csv")
+
+    by_sku = {p["sku_code"]: p for p in products}
+
+    # ต้นทุนที่มีอยู่แล้วแต่ยังไม่ยืนยันว่าตรงรุ่นตรงขนาด — ตัวเลขกำไรที่คิดจากราคาพวกนี้
+    # ยังสรุปไม่ได้เต็มปาก เช่น SKU0014 ใช้ราคาของ 250ml มาเทียบกับสินค้า 240ml
+    unverified_cost = []
+    for row in vendor_prices:
+        if row["vendor_role"] != "supplier":
+            continue
+        if row["confidence"] in ("verified", "template_sample"):
+            continue
+        product = by_sku.get(row["sku_code"])
+        if not product:
+            continue
+        unverified_cost.append({
+            "sku_code": row["sku_code"],
+            "product_name": product["product_name"],
+            "brand": product["brand"],
+            "price": row["price"],
+            "confidence": row["confidence"],
+            "note": row["note"],
+        })
+    unverified_cost.sort(key=lambda r: (r["confidence"], r["sku_code"]))
+
+    def flagged(flag):
+        return [p for p in products if flag in (p["data_flags"] or "").split(";")]
+
+    return {
+        "no_retail_price": sorted(flagged("no_retail_price"), key=lambda p: p["sku_code"]),
+        "unverified_cost": unverified_cost,
+        "pack_qty_guessed": sorted(flagged("pack_qty_not_in_name"),
+                                   key=lambda p: (p["brand"], p["sku_code"])),
+    }
+
+
+def gaps_table(rows, columns, fill_columns):
+    """สร้างตาราง HTML พร้อมช่องสีเหลืองไว้กรอกด้วยมือ"""
+    head = "".join(f"<th>{html.escape(label)}</th>" for _, label in columns)
+    head += "".join(f"<th class='write'>{html.escape(label)}</th>" for label in fill_columns)
+
+    body = []
+    for row in rows:
+        cells = "".join(
+            f"<td>{html.escape(str(row.get(key) or '-'))}</td>" for key, _ in columns
+        )
+        cells += "".join("<td class='write'></td>" for _ in fill_columns)
+        body.append(f"<tr>{cells}</tr>")
+
+    return (f"<table><thead><tr>{head}</tr></thead>"
+            f"<tbody>{''.join(body)}</tbody></table>")
+
+
+def write_gaps_html(gaps):
+    path = BUILD / "data_gaps.html"
+    sections = []
+
+    sections.append(f"""
+<h2>1. ยังไม่มีราคาขาย — POS ขายไม่ได้เลย ({len(gaps['no_retail_price'])} รายการ)</h2>
+<p class="note">สินค้าเหล่านี้ไม่มีราคาขายในชีต ระบบจึงคิดเงินไม่ได้ ต้องเติมราคาลงคอลัมน์
+<strong>Price</strong> ในชีต <strong>SKU Price Comparison</strong> ก่อนเปิดใช้จริง</p>
+{gaps_table(gaps['no_retail_price'],
+            [("sku_code", "SKU"), ("brand", "แบรนด์"), ("product_name", "สินค้า")],
+            ["ราคาขาย"])}""")
+
+    sections.append(f"""
+<h2>2. ต้นทุนที่ต้องตรวจซ้ำก่อนเชื่อ ({len(gaps['unverified_cost'])} รายการ)</h2>
+<p class="note">มีราคา Makro แล้ว แต่ยังไม่ยืนยันว่าเป็นสินค้ารุ่นเดียวขนาดเดียวกัน
+ตัวเลขกำไรที่คิดจากราคาเหล่านี้จึงยังสรุปไม่ได้เต็มปาก
+เปิดหน้าสินค้าจริงบน makro.pro แล้วยืนยันขนาดบรรจุให้ตรงก่อน</p>
+{gaps_table(gaps['unverified_cost'],
+            [("sku_code", "SKU"), ("product_name", "สินค้า"),
+             ("price", "ราคาที่บันทึกไว้"), ("confidence", "ระดับ"), ("note", "หมายเหตุเดิม")],
+            ["ราคาที่ยืนยันแล้ว"])}""")
+
+    sections.append(f"""
+<h2>3. จำนวนต่อแพ็คที่ระบบเดาเป็น 1 ({len(gaps['pack_qty_guessed'])} รายการ)</h2>
+<p class="note">ชื่อสินค้าไม่ได้บอกจำนวนต่อแพ็ค ระบบจึงตั้งเป็น 1 ไว้ก่อน
+ถ้าจริงๆ ขายยกแพ็ค ตัวเลขต้นทุนต่อหน่วยและกำไรจะผิดทั้งหมด
+กรอกจำนวนจริงแล้วแก้ชื่อสินค้าในชีตให้ระบุแพ็คด้วย เช่น "x 4" หรือ "แพ็ค 6"</p>
+{gaps_table(gaps['pack_qty_guessed'],
+            [("sku_code", "SKU"), ("brand", "แบรนด์"), ("product_name", "สินค้า"),
+             ("retail_price", "ราคาขาย")],
+            ["จำนวนต่อแพ็คจริง"])}""")
+
+    page = f"""<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<title>ใบงานเติมข้อมูลที่ขาด</title>
+<style>
+  body {{ font-family: -apple-system, 'Segoe UI', Sarabun, sans-serif; margin: 24px; color:#111; }}
+  h1 {{ font-size: 20px; margin-bottom: 4px; }}
+  .sub {{ color:#555; font-size: 13px; margin-bottom: 20px; }}
+  h2 {{ font-size: 15px; margin: 26px 0 6px; padding: 6px 10px; background:#eee;
+       border-left: 4px solid #0f766e; }}
+  .note {{ font-size: 12px; color:#444; margin: 0 0 8px; }}
+  table {{ width:100%; border-collapse: collapse; font-size: 12px; }}
+  th, td {{ border:1px solid #bbb; padding: 5px 7px; text-align:left; vertical-align: top; }}
+  th {{ background:#f4f4f4; }}
+  .write {{ width: 110px; background:#fffde7; }}
+  tr {{ page-break-inside: avoid; }}
+  @media print {{ body {{ margin: 8mm; }}
+    h2 {{ background:#eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }} }}
+</style></head><body>
+<h1>ใบงานเติมข้อมูลที่ขาด — sinthaiPOS</h1>
+<div class="sub">
+  สร้างเมื่อ {date.today().isoformat()} · กรอกช่องสีเหลืองแล้วนำกลับไปแก้ใน Google Sheet
+  จากนั้นรัน <code>python3 scripts/import_from_sheet.py</code> อีกครั้ง<br>
+  ใบงานเก็บราคา Makro ของ 130 รายการที่ยังไม่รู้ต้นทุน อยู่แยกที่
+  <code>build/makro_worklist.html</code>
+</div>
+{''.join(sections)}
+</body></html>"""
+
+    path.write_text(page, encoding="utf-8")
+    return path
+
+
 def main():
     BUILD.mkdir(exist_ok=True)
     rows, suspect_brands, flat_groups = build_worklist()
@@ -206,6 +333,15 @@ def main():
     print(f"  เก็บเมื่อมีเวลา                       : {counts[3]:>3} รายการ")
     print(f"\nเขียนแล้ว: {csv_path.relative_to(ROOT)}")
     print(f"เขียนแล้ว: {html_path.relative_to(ROOT)}  (เปิดแล้วสั่งพิมพ์ได้เลย)")
+
+    gaps = collect_gaps()
+    gaps_path = write_gaps_html(gaps)
+    print()
+    print("ช่องว่างข้อมูลอื่นที่ต้องเติม:")
+    print(f"  ยังไม่มีราคาขาย (ขายไม่ได้เลย) : {len(gaps['no_retail_price']):>3} รายการ")
+    print(f"  ต้นทุนที่ต้องตรวจซ้ำ            : {len(gaps['unverified_cost']):>3} รายการ")
+    print(f"  จำนวนต่อแพ็คที่ระบบเดาเป็น 1    : {len(gaps['pack_qty_guessed']):>3} รายการ")
+    print(f"เขียนแล้ว: {gaps_path.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
