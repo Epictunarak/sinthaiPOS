@@ -157,6 +157,17 @@ check('ใบเสร็จหักส่วนลดถูกต้อง', /
 check('ใบเสร็จมีรายการสินค้าที่ขาย', /×/.test(receipt));
 
 // ---------------------------------------------------------------------------
+console.log('\nรายงาน');
+await page.goto(`${BASE}#/reports`);
+await page.waitForTimeout(1400);
+const reportText = await text('main');
+check('เตือนเมื่อมีสินค้าขายต่ำกว่าทุน', /ขายสินค้าต่ำกว่าทุน/.test(reportText));
+check('แสดงกำไรขั้นต้น ไม่ใช่แค่ยอดขาย', /กำไรขั้นต้น/.test(reportText));
+check('บอกตรงๆ ว่ากำไรครอบคลุมยอดขายกี่เปอร์เซ็นต์', /% ของยอดขาย/.test(reportText));
+check('มีตารางสินค้าขายดี', /ขายดีที่สุด/.test(reportText));
+check('สินค้าที่ยังไม่รู้ต้นทุนไม่ถูกนับกำไรเป็นศูนย์', /ยังไม่รู้ทุน/.test(reportText));
+
+// ---------------------------------------------------------------------------
 check('ไม่มี JavaScript error ระหว่างทดสอบ', pageErrors.length === 0);
 if (pageErrors.length) console.log('   ', pageErrors.join(' | '));
 

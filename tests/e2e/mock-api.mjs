@@ -83,7 +83,19 @@ const server = http.createServer((req, res) => {
           date: url.searchParams.get('date'),
           orderCount: 7,
           totalSales: 2480.5,
-          totalDiscount: 40
+          totalDiscount: 40,
+          grossProfit: -18,
+          revenueWithKnownCost: 800,
+          unknownCostRevenue: 1680.5,
+          itemCount: 23,
+          topSellers: [
+            { sku: 'SKU0016', name: 'ยูโร่ คัสตาร์ดเค้ก 17 ก. 12 ชิ้น', qty: 9, revenue: 450, profit: -9, soldBelowCost: true },
+            { sku: 'SKU0003', name: 'SINGHA Drinking Water 1.5L Pack 6', qty: 7, revenue: 350, profit: 7, soldBelowCost: false },
+            { sku: 'SKU0009', name: 'Coke Original 999ml x 12 units', qty: 4, revenue: 1040, profit: null, soldBelowCost: false }
+          ],
+          soldBelowCost: [
+            { sku: 'SKU0016', name: 'ยูโร่ คัสตาร์ดเค้ก 17 ก. 12 ชิ้น', qty: 9, revenue: 450, profit: -9, soldBelowCost: true }
+          ]
         });
       default:
         return send({ ok: true, time: new Date().toISOString() });

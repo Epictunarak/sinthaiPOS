@@ -97,7 +97,17 @@ function handleCreateSale_(payload) {
   });
 }
 
-/** สรุปยอดขายของวันที่ระบุ (YYYY-MM-DD) */
+/**
+ * สรุปยอดขายของวันที่ระบุ (YYYY-MM-DD)
+ *
+ * รายงานนี้บอก "กำไร" ไม่ใช่แค่ "ยอดขาย" เพราะยอดขายสูงไม่ได้แปลว่าได้กำไร
+ * ข้อมูลจริงของร้านมีสินค้าที่ขายต่ำกว่าทุนอยู่ ยิ่งขายยิ่งขาดทุน ถ้ารายงานบอกแค่
+ * ยอดขาย ปัญหานี้จะไม่มีวันโผล่ให้เห็น
+ *
+ * ต้นทุนที่ใช้คือ Products.Cost ณ ตอนออกรายงาน (ไม่ได้เก็บต้นทุนไว้ในบิลตอนขาย)
+ * ดังนั้นถ้าต้นทุนเปลี่ยนภายหลัง กำไรย้อนหลังจะขยับตาม — ยอมรับได้สำหรับร้านขนาดนี้
+ * แต่ต้องรู้ไว้ว่าตัวเลขกำไรเป็นค่าประมาณ ไม่ใช่บัญชีต้นทุนที่ตรึงไว้แล้ว
+ */
 function handleReport_(dateStr) {
   if (!dateStr) return { ok: false, error: 'ต้องระบุ date=YYYY-MM-DD' };
 
@@ -110,11 +120,72 @@ function handleReport_(dateStr) {
   var totalSales = sales.reduce(function (sum, s) { return sum + Number(s.Total); }, 0);
   var totalDiscount = sales.reduce(function (sum, s) { return sum + Number(s.Discount); }, 0);
 
+  var saleIds = {};
+  sales.forEach(function (s) { saleIds[s.SaleID] = true; });
+
+  // ต้นทุนต่อ SKU (ว่างได้ ถ้ายังไม่รู้ราคาซัพพลายเออร์)
+  var costBySku = {};
+  var nameBySku = {};
+  sheetToObjects_(getSheet_(SHEET_NAMES.PRODUCTS)).forEach(function (p) {
+    var sku = String(p.SKU).trim();
+    nameBySku[sku] = p.Name;
+    if (p.Cost !== '' && p.Cost !== null && !isNaN(Number(p.Cost))) {
+      costBySku[sku] = Number(p.Cost);
+    }
+  });
+
+  var byProduct = {};
+  var revenueWithKnownCost = 0;
+  var costOfGoodsSold = 0;
+  var unknownCostRevenue = 0;
+
+  sheetToObjects_(getSheet_(SHEET_NAMES.SALE_ITEMS)).forEach(function (item) {
+    if (!saleIds[item.SaleID]) return;
+
+    var sku = String(item.SKU).trim();
+    var qty = Number(item.Qty) || 0;
+    var lineTotal = Number(item.LineTotal) || 0;
+    var unitPrice = Number(item.UnitPrice) || 0;
+
+    if (!byProduct[sku]) {
+      byProduct[sku] = {
+        sku: sku,
+        name: item.ProductName || nameBySku[sku] || sku,
+        qty: 0, revenue: 0, profit: null, soldBelowCost: false
+      };
+    }
+    var entry = byProduct[sku];
+    entry.qty += qty;
+    entry.revenue += lineTotal;
+
+    if (costBySku[sku] !== undefined) {
+      var cost = costBySku[sku];
+      var lineProfit = (unitPrice - cost) * qty;
+      entry.profit = (entry.profit || 0) + lineProfit;
+      if (unitPrice < cost) entry.soldBelowCost = true;
+      revenueWithKnownCost += lineTotal;
+      costOfGoodsSold += cost * qty;
+    } else {
+      unknownCostRevenue += lineTotal;
+    }
+  });
+
+  var products = Object.keys(byProduct).map(function (sku) { return byProduct[sku]; });
+  var topSellers = products.slice().sort(function (a, b) { return b.qty - a.qty; }).slice(0, 10);
+  var losers = products.filter(function (p) { return p.soldBelowCost; });
+
   return {
     ok: true,
     date: dateStr,
     orderCount: sales.length,
     totalSales: totalSales,
-    totalDiscount: totalDiscount
+    totalDiscount: totalDiscount,
+    // กำไรขั้นต้นนับเฉพาะส่วนที่รู้ต้นทุน จึงต้องรายงานคู่กับสัดส่วนที่ยังไม่รู้เสมอ
+    grossProfit: revenueWithKnownCost - costOfGoodsSold,
+    revenueWithKnownCost: revenueWithKnownCost,
+    unknownCostRevenue: unknownCostRevenue,
+    itemCount: products.reduce(function (sum, p) { return sum + p.qty; }, 0),
+    topSellers: topSellers,
+    soldBelowCost: losers
   };
 }
