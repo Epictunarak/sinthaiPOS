@@ -68,7 +68,8 @@ Apple Developer account หน้าจอที่มี:
 | Unit (บาร์โค้ด) | หลักตรวจสอบ GS1, UPC-A, รหัสภายใน 11 เคส | `cd web && npm test` |
 | Unit (ใบเสร็จ) | คำนวณยอด, ส่วนลดผิดรูปแบบ, วันที่ พ.ศ., escape HTML | `cd web && npm test` |
 | Unit (สต็อก) | กันยอดคงเหลือถูกเขียนทับด้วยค่าว่าง/null จนกลายเป็น 0 | `cd web && npm test` |
-| Apps Script | สร้างชีต, รันซ้ำ, เติมคอลัมน์ที่ขาด, ตรวจความพร้อม 14 เคส | `node --test "tests/apps-script/*.test.mjs"` |
+| Apps Script (ติดตั้ง) | สร้างชีต, รันซ้ำ, เติมคอลัมน์ที่ขาด, ตรวจความพร้อม 14 เคส | `node --test "tests/apps-script/*.test.mjs"` |
+| Apps Script (API) | ขาย/ตัดสต็อก/ยกเลิก/คืนของ/ตรวจนับ/บาร์โค้ด/รายงาน 26 เคส | `node --test "tests/apps-script/*.test.mjs"` |
 | Python (นำเข้าข้อมูล) | บาร์โค้ดไม่กลายเป็นทศนิยม, รหัส SKU, อ่านจำนวนต่อแพ็ค 16 เคส | `python3 tests/test_import_from_sheet.py` |
 | E2E (เบราว์เซอร์) | 48 เคส: ขายของ, ใบเสร็จ, ยกเลิกบิล, รายงาน, ตรวจนับ, เก็บบาร์โค้ด, **ขายตอนเน็ตหลุดแล้ว sync**, ไม่ล้นจอ | `tests/e2e/` |
 

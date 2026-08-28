@@ -132,7 +132,14 @@ export function loadAppsScript(fileNames, { sheets = {}, scriptProperties = {} }
     },
     ContentService: {
       MimeType: { JSON: 'application/json' },
-      createTextOutput: (text) => ({ setMimeType: () => ({ text }) })
+      // เก็บข้อความที่ตอบกลับไว้ให้เทสต์อ่านได้ ของจริงคืน TextOutput ที่อ่านค่าไม่ได้ตรงๆ
+      createTextOutput: (text) => {
+        const output = {
+          getContent: () => text,
+          setMimeType() { return output; }
+        };
+        return output;
+      }
     },
     console
   };
@@ -143,6 +150,22 @@ export function loadAppsScript(fileNames, { sheets = {}, scriptProperties = {} }
     vm.runInContext(code, context, { filename: name });
   }
   return context;
+}
+
+/**
+ * เรียก doGet / doPost แล้วแกะ JSON ที่ตอบกลับมาให้
+ * ใช้ทดสอบ API จริงแบบเดียวกับที่แอปเรียก ไม่ใช่เรียกฟังก์ชันภายในตรงๆ
+ */
+export function apiGet(ctx, action, params = {}, token = 'test-token') {
+  const response = ctx.doGet({ parameter: { action, token, ...params } });
+  return JSON.parse(response.getContent());
+}
+
+export function apiPost(ctx, action, payload = {}, token = 'test-token') {
+  const response = ctx.doPost({
+    postData: { contents: JSON.stringify({ action, token, payload }) }
+  });
+  return JSON.parse(response.getContent());
 }
 
 export { FakeSheet, FakeSpreadsheet };
