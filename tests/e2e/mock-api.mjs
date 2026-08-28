@@ -56,6 +56,10 @@ const products = lines.slice(1).map((line) => {
 const knownCosts = { SKU0014: 149, SKU0016: 51, SKU0023: 48, SKU0003: 49, SKU0006: 47 };
 products.forEach((p) => { if (knownCosts[p.SKU]) p.Cost = knownCosts[p.SKU]; });
 
+// จำลองของใกล้หมดและของที่หมดแล้ว เพื่อให้หน้าสั่งซื้อมีอะไรให้ทดสอบ
+const lowStock = { SKU0003: 2, SKU0006: 5, SKU0014: 0, SKU0016: 1 };
+products.forEach((p) => { if (lowStock[p.SKU] !== undefined) p.StockQty = lowStock[p.SKU]; });
+
 // จำบิลที่ถูกยกเลิกไว้ เพื่อให้ทดสอบได้ว่ากดยกเลิกซ้ำแล้วระบบปฏิเสธจริง
 const voidedSales = new Set();
 

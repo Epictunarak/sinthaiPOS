@@ -7,13 +7,15 @@ import { renderInventory } from './pages/inventory.js';
 import { renderReports } from './pages/reports.js';
 import { renderBarcodes } from './pages/barcodes.js';
 import { renderStocktake } from './pages/stocktake.js';
+import { renderRestock } from './pages/restock.js';
 
 const ROUTES = {
   '#/pos': { render: renderPos, label: 'ขายของ' },
   '#/inventory': { render: renderInventory, label: 'สต็อก' },
   '#/reports': { render: renderReports, label: 'รายงาน' },
   '#/barcodes': { render: renderBarcodes, label: 'เก็บบาร์โค้ด' },
-  '#/stocktake': { render: renderStocktake, label: 'ตรวจนับ' }
+  '#/stocktake': { render: renderStocktake, label: 'ตรวจนับ' },
+  '#/restock': { render: renderRestock, label: 'สั่งซื้อ/รับของ' }
 };
 
 const app = document.getElementById('app');

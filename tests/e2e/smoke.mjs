@@ -78,7 +78,7 @@ await page.evaluate(() => localStorage.setItem(
 
 // ---------------------------------------------------------------------------
 console.log('\nทุกหน้าต้องไม่ล้นขอบจอมือถือ');
-for (const route of ['pos', 'inventory', 'barcodes', 'stocktake', 'reports']) {
+for (const route of ['pos', 'inventory', 'barcodes', 'stocktake', 'restock', 'reports']) {
   await page.goto(`${BASE}#/${route}`);
   await page.waitForTimeout(1200);
   const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
@@ -132,6 +132,25 @@ await page.locator('[data-count]').nth(1).fill('-5');
 await page.locator('[data-save]').nth(1).click();
 await page.waitForTimeout(600);
 check('ปฏิเสธจำนวนติดลบ', /ตั้งแต่ 0/.test(await text('.msg')));
+
+// ---------------------------------------------------------------------------
+console.log('\nสั่งซื้อ / รับของ');
+await page.goto(`${BASE}#/restock`);
+await page.waitForTimeout(1400);
+const restockText = await text('main');
+check('แสดงรายการที่ต่ำกว่าจุดสั่งซื้อ', /ต้องสั่งซื้อ [1-9]/.test(restockText));
+check('ประมาณการค่าใช้จ่ายในการสั่งซื้อ', /ประมาณการค่าใช้จ่าย/.test(restockText));
+check('ทำเครื่องหมายสินค้าที่หมดสต็อกแล้ว', /หมด/.test(restockText));
+
+await page.locator('[data-receive]').first().fill('24');
+await page.locator('[data-add]').first().click();
+await page.waitForTimeout(900);
+check('บันทึกการรับของเข้าสต็อก', /รับ .* เข้า 24/.test(await text('.msg')));
+
+await page.locator('[data-receive]').nth(1).fill('0');
+await page.locator('[data-add]').nth(1).click();
+await page.waitForTimeout(700);
+check('ปฏิเสธการรับของจำนวน 0', /มากกว่า 0/.test(await text('.msg')));
 
 // ---------------------------------------------------------------------------
 console.log('\nขายของ');
