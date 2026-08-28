@@ -73,6 +73,9 @@ psql -U postgres -d sinthai \
 # ทดสอบตรรกะฝั่งแอป
 cd web && npm test
 
+# ทดสอบตรรกะการติดตั้งฝั่ง Apps Script (จำลอง Sheets API ไม่ต้องขึ้น Google)
+node --test "tests/apps-script/*.test.mjs"
+
 # ทดสอบโดยขับแอปจริงในเบราว์เซอร์ (ดู tests/e2e/README.md)
 node tests/e2e/mock-api.mjs   # แล้วรัน smoke.mjs ตามขั้นตอนในเอกสาร
 ```
@@ -82,6 +85,9 @@ node tests/e2e/mock-api.mjs   # แล้วรัน smoke.mjs ตามขั�
 ### 1. ตั้งค่า Backend (Google Sheet + Apps Script)
 ทำตาม [`apps-script/README.md`](apps-script/README.md) ทีละขั้น — จะได้ URL ของ Web App
 และ API token มาใช้ในขั้นถัดไป
+
+> ไม่ต้องสร้างชีตและพิมพ์หัวคอลัมน์เอง — รันฟังก์ชัน `setupSheets()` ครั้งเดียวสร้างให้ครบ
+> แล้วรัน `checkSetup()` เพื่อให้ระบบบอกว่าอะไรยังขาดก่อนเปิดใช้จริง
 
 ### 2. รัน PWA บนเครื่องตัวเอง (dev)
 ```bash
