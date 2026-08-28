@@ -191,6 +191,49 @@ await page.waitForTimeout(1200);
 check('ปฏิเสธการยกเลิกบิลเดิมซ้ำ', /ถูกยกเลิกไปแล้ว/.test(await text('.msg.error')));
 
 // ---------------------------------------------------------------------------
+// เส้นทางที่พังแล้วเสียหายหนักที่สุด: ขายตอนเน็ตหลุดแล้วบิลหายไปเลย
+console.log('\nขายตอนเน็ตหลุดแล้ว sync กลับ');
+const pendingSales = () => page.evaluate(async () => {
+  const db = await new Promise((resolve, reject) => {
+    const request = indexedDB.open('sinthaipos', 1);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  return new Promise((resolve, reject) => {
+    const query = db.transaction('pendingSales', 'readonly').objectStore('pendingSales').getAll();
+    query.onsuccess = () => resolve(query.result);
+    query.onerror = () => reject(query.error);
+  });
+});
+
+await page.goto(`${BASE}#/pos`);
+await page.waitForTimeout(1400);          // โหลดสินค้าเข้าแคชตอนยังออนไลน์
+
+await context.setOffline(true);
+await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+await page.waitForTimeout(300);
+
+await page.locator('[data-sku]').first().click();
+await page.waitForTimeout(300);
+await page.click('#checkout');
+await page.waitForTimeout(1200);
+check('ยังขายได้ตอนเน็ตหลุด', /ออฟไลน์/.test(await text('.msg')));
+check('ลูกค้ายังได้ใบเสร็จตอนเน็ตหลุด', (await page.locator('.receipt-preview').count()) > 0);
+check('บิลถูกเก็บเข้าคิวในเครื่อง', (await pendingSales()).length === 1);
+
+const postedActions = [];
+page.on('request', (r) => {
+  if (r.method() !== 'POST') return;
+  try { postedActions.push(JSON.parse(r.postData() || '{}').action); } catch { /* ข้าม */ }
+});
+
+await context.setOffline(false);
+await page.evaluate(() => window.dispatchEvent(new Event('online')));
+await page.waitForTimeout(2500);
+check('เน็ตกลับมาแล้วคิวถูกส่งจนหมด', (await pendingSales()).length === 0);
+check('ส่งบิลที่ค้างขึ้น server จริง', postedActions.includes('createSale'));
+
+// ---------------------------------------------------------------------------
 check('ไม่มี JavaScript error ระหว่างทดสอบ', pageErrors.length === 0);
 if (pageErrors.length) console.log('   ', pageErrors.join(' | '));
 
