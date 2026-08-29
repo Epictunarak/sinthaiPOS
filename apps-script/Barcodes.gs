@@ -89,6 +89,8 @@ function handleSetBarcode_(payload) {
       UserId: payload.userId || ''
     });
 
+    logActivity_(payload.userId, 'setBarcode', sku + ' -> ' + barcode + (previous ? ' (แทนที่ ' + previous + ')' : ''));
+
     return { ok: true, sku: sku, barcode: barcode, replaced: previous || null };
   });
 }

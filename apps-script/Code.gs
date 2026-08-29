@@ -24,6 +24,10 @@ function doGet(e) {
         return jsonResponse_(handleGetProducts_());
       case 'report':
         return jsonResponse_(handleReport_(params.date));
+      case 'reportRange':
+        return jsonResponse_(handleReportRange_(params.dateFrom, params.dateTo));
+      case 'search':
+        return jsonResponse_(handleGlobalSearch_(params.q));
       case 'settings':
         return jsonResponse_({ ok: true, settings: getSettings_() });
       default:

@@ -55,6 +55,8 @@ function handleCountStock_(payload) {
       UserId: payload.userId || ''
     });
 
+    logActivity_(payload.userId, 'stocktake', sku + ' ' + before + ' -> ' + counted + ' (' + (difference > 0 ? '+' : '') + difference + ')');
+
     return { ok: true, sku: sku, stockQty: counted, before: before, difference: difference };
   });
 }

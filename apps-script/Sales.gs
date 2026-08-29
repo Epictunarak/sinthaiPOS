@@ -93,6 +93,8 @@ function handleCreateSale_(payload) {
       });
     });
 
+    logActivity_(payload.cashierId, 'sale', saleId + ' รวม ' + total + ' บาท (' + items.length + ' รายการ)');
+
     return { ok: true, saleId: saleId, total: total };
   });
 }
@@ -159,6 +161,8 @@ function handleVoidSale_(payload) {
     });
 
     updateRowFields_(salesSheet, rowIndex, { Status: 'voided' });
+
+    logActivity_(payload.userId, 'void', saleId + ' คืนสต็อก ' + restored + '/' + items.length + ' รายการ');
 
     return { ok: true, saleId: saleId, itemsRestored: restored, itemCount: items.length };
   });
@@ -265,5 +269,85 @@ function handleReport_(dateStr) {
     itemCount: products.reduce(function (sum, p) { return sum + p.qty; }, 0),
     topSellers: topSellers,
     soldBelowCost: losers
+  };
+}
+
+/**
+ * สรุปยอดขายช่วงวันที่ (dateFrom ถึง dateTo แบบ YYYY-MM-DD ทั้งคู่) พร้อมยอดรายวัน
+ *
+ * ต่างจาก handleReport_ (รายวันเดียว) ตรงที่ดูเทรนด์หลายวันได้ในคำขอเดียว เช่น
+ * สรุปยอดขายประจำเดือน — คำนวณกำไรด้วยตรรกะเดียวกัน (นับเฉพาะ SKU ที่รู้ต้นทุน
+ * จาก Products.Cost ปัจจุบัน) ยังไม่ได้ต่อเข้าหน้ารายงานในแอป เตรียมไว้ให้ใช้ได้เลย
+ * เมื่อจะทำตัวเลือกช่วงวันที่ในอนาคต
+ */
+function handleReportRange_(dateFromStr, dateToStr) {
+  if (!dateFromStr || !dateToStr) {
+    return { ok: false, error: 'ต้องระบุ dateFrom และ dateTo (YYYY-MM-DD)' };
+  }
+  if (dateFromStr > dateToStr) {
+    return { ok: false, error: 'dateFrom ต้องไม่เกิน dateTo' };
+  }
+
+  var sales = sheetToObjects_(getSheet_(SHEET_NAMES.SALES)).filter(function (s) {
+    if (s.Status !== 'completed') return false;
+    var d = Utilities.formatDate(new Date(s.Timestamp), 'Asia/Bangkok', 'yyyy-MM-dd');
+    return d >= dateFromStr && d <= dateToStr;
+  });
+
+  var saleIds = {};
+  sales.forEach(function (s) { saleIds[s.SaleID] = true; });
+
+  var costBySku = {};
+  sheetToObjects_(getSheet_(SHEET_NAMES.PRODUCTS)).forEach(function (p) {
+    var sku = String(p.SKU).trim();
+    if (p.Cost !== '' && p.Cost !== null && !isNaN(Number(p.Cost))) {
+      costBySku[sku] = Number(p.Cost);
+    }
+  });
+
+  var dailyTotals = {};
+  sales.forEach(function (s) {
+    var d = Utilities.formatDate(new Date(s.Timestamp), 'Asia/Bangkok', 'yyyy-MM-dd');
+    if (!dailyTotals[d]) dailyTotals[d] = { date: d, totalSales: 0, orderCount: 0 };
+    dailyTotals[d].totalSales += Number(s.Total) || 0;
+    dailyTotals[d].orderCount += 1;
+  });
+
+  var revenueWithKnownCost = 0;
+  var costOfGoodsSold = 0;
+  var unknownCostRevenue = 0;
+
+  sheetToObjects_(getSheet_(SHEET_NAMES.SALE_ITEMS)).forEach(function (item) {
+    if (!saleIds[item.SaleID]) return;
+    var sku = String(item.SKU).trim();
+    var qty = Number(item.Qty) || 0;
+    var lineTotal = Number(item.LineTotal) || 0;
+
+    if (costBySku[sku] !== undefined) {
+      revenueWithKnownCost += lineTotal;
+      costOfGoodsSold += costBySku[sku] * qty;
+    } else {
+      unknownCostRevenue += lineTotal;
+    }
+  });
+
+  var totalSales = sales.reduce(function (sum, s) { return sum + (Number(s.Total) || 0); }, 0);
+  var totalDiscount = sales.reduce(function (sum, s) { return sum + (Number(s.Discount) || 0); }, 0);
+
+  var daily = Object.keys(dailyTotals)
+    .map(function (d) { return dailyTotals[d]; })
+    .sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+
+  return {
+    ok: true,
+    dateFrom: dateFromStr,
+    dateTo: dateToStr,
+    orderCount: sales.length,
+    totalSales: totalSales,
+    totalDiscount: totalDiscount,
+    grossProfit: revenueWithKnownCost - costOfGoodsSold,
+    revenueWithKnownCost: revenueWithKnownCost,
+    unknownCostRevenue: unknownCostRevenue,
+    daily: daily
   };
 }

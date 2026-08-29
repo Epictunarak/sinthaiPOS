@@ -22,7 +22,8 @@ var REQUIRED_SHEETS = {
   StockMovements: ['Timestamp', 'SKU', 'ChangeQty', 'Reason', 'RefSaleID', 'UserId'],
   Staff: ['UserId', 'Name', 'PinHash', 'Role', 'Active'],
   Settings: ['Key', 'Value'],
-  BarcodeCaptures: ['Timestamp', 'SKU', 'Barcode', 'PreviousBarcode', 'UserId']
+  BarcodeCaptures: ['Timestamp', 'SKU', 'Barcode', 'PreviousBarcode', 'UserId'],
+  ActivityLogs: ['Timestamp', 'UserId', 'Action', 'Details']
 };
 
 /** คอลัมน์ที่ต้องบังคับเป็นข้อความ ไม่งั้น Sheets จะกลืนเลข 0 นำหน้าหรือแปลงเป็น float */

@@ -31,6 +31,7 @@ function fullyConfigured(overrides = {}) {
               ['U1', 'เจ้าของร้าน', 'f'.repeat(64), 'owner', true]],
       Settings: [['Key', 'Value'], ['ShopName', 'สินไทยพาณิชย์']],
       BarcodeCaptures: [['Timestamp', 'SKU', 'Barcode', 'PreviousBarcode', 'UserId']],
+      ActivityLogs: [['Timestamp', 'UserId', 'Action', 'Details']],
       ...overrides
     }
   });

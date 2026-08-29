@@ -14,7 +14,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadAppsScript, apiGet, apiPost } from './harness.mjs';
 
-const FILES = ['Utils.gs', 'Auth.gs', 'Products.gs', 'Sales.gs', 'Barcodes.gs', 'Setup.gs', 'Code.gs'];
+const FILES = ['Utils.gs', 'Auth.gs', 'Products.gs', 'Sales.gs', 'Barcodes.gs', 'Search.gs', 'Setup.gs', 'Code.gs'];
 const TOKEN = 'test-token';
 
 // PIN 1234 แบบ hash แล้ว (ค่าเดียวกับที่ hashPin_ คำนวณ)
@@ -41,7 +41,8 @@ function shop() {
               ['U1', 'เจ้าของร้าน', PIN_1234_HASH, 'owner', true],
               ['U2', 'พนักงานลาออก', PIN_1234_HASH, 'cashier', false]],
       Settings: [['Key', 'Value'], ['ShopName', 'สินไทยพาณิชย์']],
-      BarcodeCaptures: [['Timestamp', 'SKU', 'Barcode', 'PreviousBarcode', 'UserId']]
+      BarcodeCaptures: [['Timestamp', 'SKU', 'Barcode', 'PreviousBarcode', 'UserId']],
+      ActivityLogs: [['Timestamp', 'UserId', 'Action', 'Details']]
     }
   });
 }
@@ -134,6 +135,16 @@ test('หักส่วนลดออกจากยอดสุทธิ', ()
   assert.equal(result.total, 75);
 });
 
+test('ขายของแล้วบันทึกลง ActivityLogs ไว้ตรวจย้อนหลัง', () => {
+  const ctx = shop();
+  apiPost(ctx, 'createSale', sale());
+
+  const logs = ctx.spreadsheet.getSheetByName('ActivityLogs').rows;
+  assert.equal(logs.length, 2, 'ต้องมีหัวตาราง + 1 รายการ');
+  assert.equal(logs[1][1], 'U1');
+  assert.equal(logs[1][2], 'sale');
+});
+
 test('ไม่ยอมให้ขายเกินจำนวนที่มีในสต็อก', () => {
   const ctx = shop();
   const result = apiPost(ctx, 'createSale', sale({
@@ -196,6 +207,16 @@ test('ยกเลิกแล้วเปลี่ยนสถานะบิ�
   assert.equal(sales[1][9], 'voided');
 });
 
+test('ยกเลิกบิลแล้วบันทึกลง ActivityLogs ด้วย', () => {
+  const ctx = shop();
+  const created = apiPost(ctx, 'createSale', sale());
+  apiPost(ctx, 'voidSale', { saleId: created.saleId, userId: 'U1' });
+
+  const logs = ctx.spreadsheet.getSheetByName('ActivityLogs').rows;
+  assert.equal(logs.length, 3, 'ต้องมีหัวตาราง + sale + void');
+  assert.equal(logs[2][2], 'void');
+});
+
 test('ยกเลิกบิลเดิมซ้ำต้องถูกปฏิเสธ ไม่คืนสต็อกสองรอบ', () => {
   const ctx = shop();
   const created = apiPost(ctx, 'createSale', sale());
@@ -250,6 +271,33 @@ test('รายงานคิดกำไรจากต้นทุน แล�
   assert.equal(report.soldBelowCost[0].sku, 'SKU0016');
 });
 
+test('reportRange รวมยอดหลายวันและแยกยอดรายวันให้', () => {
+  const ctx = shop();
+  apiPost(ctx, 'createSale', sale({ clientSaleId: 'c1' }));
+  apiPost(ctx, 'createSale', sale({ clientSaleId: 'c2', items: [{ sku: 'SKU0003', qty: 1, unitPrice: 50 }] }));
+
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  const range = apiGet(ctx, 'reportRange', { dateFrom: dateStr, dateTo: dateStr });
+  assert.equal(range.ok, true);
+  assert.equal(range.orderCount, 2);
+  assert.equal(range.totalSales, 150);
+  assert.equal(range.daily.length, 1, 'สองบิลในวันเดียวกันต้องรวมเป็นแถวเดียว');
+  assert.equal(range.daily[0].date, dateStr);
+  assert.equal(range.daily[0].orderCount, 2);
+});
+
+test('reportRange ปฏิเสธเมื่อ dateFrom เกิน dateTo', () => {
+  const result = apiGet(shop(), 'reportRange', { dateFrom: '2026-08-20', dateTo: '2026-08-01' });
+  assert.equal(result.ok, false);
+});
+
+test('reportRange ปฏิเสธเมื่อไม่ระบุวันที่', () => {
+  const result = apiGet(shop(), 'reportRange', {});
+  assert.equal(result.ok, false);
+});
+
 // ---------------------------------------------------------------------------
 test('ตรวจนับสต็อกบันทึกส่วนต่าง ไม่ใช่แค่ทับตัวเลข', () => {
   const ctx = shop();
@@ -262,6 +310,18 @@ test('ตรวจนับสต็อกบันทึกส่วนต่�
 
   const movements = ctx.spreadsheet.getSheetByName('StockMovements').rows;
   assert.equal(movements[1][3], 'stocktake', 'ต้องบันทึกที่มาของการเปลี่ยนแปลง');
+
+  const logs = ctx.spreadsheet.getSheetByName('ActivityLogs').rows;
+  assert.equal(logs.length, 2, 'ตรวจนับที่มีส่วนต่างต้องบันทึกลง ActivityLogs');
+  assert.equal(logs[1][2], 'stocktake');
+});
+
+test('ตรวจนับที่จำนวนไม่ต่างจากเดิมไม่ต้องบันทึกลง ActivityLogs', () => {
+  const ctx = shop();
+  apiPost(ctx, 'countStock', { sku: 'SKU0016', countedQty: 20, userId: 'U1' });
+
+  const logs = ctx.spreadsheet.getSheetByName('ActivityLogs').rows;
+  assert.equal(logs.length, 1, 'ไม่มีการเปลี่ยนแปลงจริง ไม่ควรมี log เพิ่ม');
 });
 
 test('ตรวจนับปฏิเสธจำนวนติดลบ', () => {
@@ -288,6 +348,10 @@ test('บันทึกบาร์โค้ดที่ถูกต้อง�
 
   const captures = ctx.spreadsheet.getSheetByName('BarcodeCaptures').rows;
   assert.equal(captures.length, 2, 'ต้องต่อท้ายชีตบันทึกไว้กันหายตอน import รอบหน้า');
+
+  const logs = ctx.spreadsheet.getSheetByName('ActivityLogs').rows;
+  assert.equal(logs.length, 2);
+  assert.equal(logs[1][2], 'setBarcode');
 });
 
 test('ปฏิเสธบาร์โค้ดที่หลักตรวจสอบไม่ตรง แม้ยิงตรงมาที่ API', () => {
@@ -304,6 +368,38 @@ test('ปฏิเสธบาร์โค้ดที่เป็นของ�
   assert.match(result.error, /SKU0003/);
 });
 
+// ---------------------------------------------------------------------------
+test('search ค้นสินค้าจากชื่อ, SKU, หรือบาร์โค้ดได้', () => {
+  const ctx = shop();
+
+  const byName = apiGet(ctx, 'search', { q: 'ยูโร่' });
+  assert.equal(byName.results.length, 1);
+  assert.equal(byName.results[0].type, 'product');
+  assert.equal(byName.results[0].sku, 'SKU0016');
+
+  const byBarcode = apiGet(ctx, 'search', { q: '8851959142011' });
+  assert.equal(byBarcode.results[0].sku, 'SKU0003');
+});
+
+test('search ค้นบิลจากเลขที่บิลหรือชื่อลูกค้าได้', () => {
+  const ctx = shop();
+  const created = apiPost(ctx, 'createSale', sale({ customerName: 'ร้านป้าหนู' }));
+
+  const bySaleId = apiGet(ctx, 'search', { q: created.saleId });
+  assert.equal(bySaleId.results.length, 1);
+  assert.equal(bySaleId.results[0].type, 'sale');
+
+  const byCustomer = apiGet(ctx, 'search', { q: 'ป้าหนู' });
+  assert.equal(byCustomer.results[0].saleId, created.saleId);
+});
+
+test('search คำค้นว่างคืน array ว่าง ไม่ใช่ error', () => {
+  const result = apiGet(shop(), 'search', { q: '' });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.results, []);
+});
+
+// ---------------------------------------------------------------------------
 test('settings คืนค่าที่ใบเสร็จใช้', () => {
   const result = apiGet(shop(), 'settings');
   assert.equal(result.ok, true);

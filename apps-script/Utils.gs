@@ -12,7 +12,8 @@ var SHEET_NAMES = {
   SALE_ITEMS: 'SaleItems',
   STOCK_MOVEMENTS: 'StockMovements',
   STAFF: 'Staff',
-  SETTINGS: 'Settings'
+  SETTINGS: 'Settings',
+  ACTIVITY_LOGS: 'ActivityLogs'
 };
 
 function getSpreadsheet_() {
@@ -124,6 +125,20 @@ function hashPin_(pin) {
 
 function generateId_(prefix) {
   return prefix + '_' + new Date().getTime() + '_' + Math.floor(Math.random() * 10000);
+}
+
+/**
+ * บันทึกกิจกรรมที่แก้ไขข้อมูลไว้ในชีต ActivityLogs เพื่อตรวจย้อนหลังได้ว่า
+ * ใครทำอะไร เมื่อไหร่ — เรียกเฉพาะตอนข้อมูลเปลี่ยนจริง ไม่ใช่ทุกครั้งที่เรียก API
+ * (เช่น ตรวจนับแล้วจำนวนไม่ต่างจากเดิมไม่ถือเป็นกิจกรรมที่ต้องบันทึก)
+ */
+function logActivity_(userId, action, details) {
+  appendObject_(getSheet_(SHEET_NAMES.ACTIVITY_LOGS), {
+    Timestamp: new Date(),
+    UserId: userId || '',
+    Action: action,
+    Details: details || ''
+  });
 }
 
 /** ใช้ LockService กันสองเครื่องขายพร้อมกันแล้วตัดสต็อกชนกัน */
