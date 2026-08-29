@@ -1,0 +1,353 @@
+/**
+ * Sales.gs — บันทึกการขาย, ตัดสต็อก, และสรุปยอดขายรายวัน
+ */
+
+/**
+ * payload = {
+ *   clientSaleId, cashierId, customerName, items: [{sku, qty, unitPrice}],
+ *   discount, paymentMethod
+ * }
+ *
+ * clientSaleId ถูกสร้างฝั่ง PWA ตอนกดขาย (แม้ยัง offline) ใช้กันบันทึกซ้ำตอน sync
+ * ซ้ำ (เช่น เน็ตหลุดกลางทาง แล้ว PWA ยิงซ้ำ) — ถ้าเจอ clientSaleId เดิมในชีต Sales
+ * แล้ว จะตอบ ok:true กลับไปเฉยๆ โดยไม่ตัดสต็อกซ้ำ
+ */
+function handleCreateSale_(payload) {
+  var clientSaleId = payload.clientSaleId;
+  var items = payload.items || [];
+
+  if (!clientSaleId) return { ok: false, error: 'ต้องระบุ clientSaleId' };
+  if (!items.length) return { ok: false, error: 'ไม่มีรายการสินค้าในบิล' };
+
+  return withLock_(function () {
+    var salesSheet = getSheet_(SHEET_NAMES.SALES);
+
+    var existingRow = findRowIndexByKey_(salesSheet, 'ClientSaleId', clientSaleId);
+    if (existingRow !== -1) {
+      var existing = sheetToObjects_(salesSheet).filter(function (s) {
+        return s.ClientSaleId === clientSaleId;
+      })[0];
+      return { ok: true, saleId: existing.SaleID, duplicate: true };
+    }
+
+    var productsSheet = getSheet_(SHEET_NAMES.PRODUCTS);
+    var productHeaders = productsSheet.getRange(1, 1, 1, productsSheet.getLastColumn()).getValues()[0];
+    var stockColIndex = productHeaders.indexOf('StockQty');
+
+    // เช็กสต็อกพอก่อนตัดจริงทุกตัว กันขายเกินสต็อก
+    var rowIndexBySku = {};
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var rowIndex = findRowIndexByKey_(productsSheet, 'SKU', item.sku);
+      if (rowIndex === -1) return { ok: false, error: 'ไม่พบสินค้า SKU: ' + item.sku };
+      var currentStock = Number(productsSheet.getRange(rowIndex, stockColIndex + 1).getValue()) || 0;
+      if (currentStock < item.qty) {
+        return { ok: false, error: 'สินค้า ' + item.sku + ' คงเหลือไม่พอ (เหลือ ' + currentStock + ')' };
+      }
+      rowIndexBySku[item.sku] = { rowIndex: rowIndex, currentStock: currentStock };
+    }
+
+    var saleId = generateId_('SALE');
+    var now = new Date();
+    var subtotal = items.reduce(function (sum, it) { return sum + it.qty * it.unitPrice; }, 0);
+    var discount = Number(payload.discount) || 0;
+    var total = subtotal - discount;
+
+    appendObject_(salesSheet, {
+      SaleID: saleId,
+      ClientSaleId: clientSaleId,
+      Timestamp: now,
+      CashierId: payload.cashierId || '',
+      CustomerName: payload.customerName || '',
+      Subtotal: subtotal,
+      Discount: discount,
+      Total: total,
+      PaymentMethod: payload.paymentMethod || 'cash',
+      Status: 'completed'
+    });
+
+    var saleItemsSheet = getSheet_(SHEET_NAMES.SALE_ITEMS);
+    var stockMovementsSheet = getSheet_(SHEET_NAMES.STOCK_MOVEMENTS);
+
+    items.forEach(function (item) {
+      appendObject_(saleItemsSheet, {
+        SaleID: saleId,
+        SKU: item.sku,
+        ProductName: item.productName || '',
+        Qty: item.qty,
+        UnitPrice: item.unitPrice,
+        LineTotal: item.qty * item.unitPrice
+      });
+
+      var info = rowIndexBySku[item.sku];
+      var newStock = info.currentStock - item.qty;
+      updateRowFields_(productsSheet, info.rowIndex, { StockQty: newStock });
+
+      appendObject_(stockMovementsSheet, {
+        Timestamp: now,
+        SKU: item.sku,
+        ChangeQty: -item.qty,
+        Reason: 'sale',
+        RefSaleID: saleId,
+        UserId: payload.cashierId || ''
+      });
+    });
+
+    logActivity_(payload.cashierId, 'sale', saleId + ' รวม ' + total + ' บาท (' + items.length + ' รายการ)');
+
+    return { ok: true, saleId: saleId, total: total };
+  });
+}
+
+/**
+ * ยกเลิกบิล และคืนสต็อกกลับเข้าระบบ
+ *
+ * พนักงานกดขายผิดเป็นเรื่องปกติที่หน้าเคาน์เตอร์ ถ้าแก้ไม่ได้ สต็อกจะเพี้ยนสะสมไปเรื่อยๆ
+ * จนตัวเลขคงเหลือใช้ไม่ได้ทั้งระบบ
+ *
+ * ไม่ลบแถวบิลทิ้ง แต่เปลี่ยนสถานะเป็น voided เพื่อให้ตรวจย้อนหลังได้ว่าเคยมีบิลนี้
+ * และใครเป็นคนยกเลิก การคืนสต็อกก็บันทึกเป็น StockMovements เหมือนทุกการเคลื่อนไหว
+ *
+ * payload = { saleId, userId }
+ */
+function handleVoidSale_(payload) {
+  var saleId = String(payload.saleId || '').trim();
+  if (!saleId) return { ok: false, error: 'ต้องระบุ saleId' };
+
+  return withLock_(function () {
+    var salesSheet = getSheet_(SHEET_NAMES.SALES);
+    var rowIndex = findRowIndexByKey_(salesSheet, 'SaleID', saleId);
+    if (rowIndex === -1) return { ok: false, error: 'ไม่พบบิล ' + saleId };
+
+    var sale = sheetToObjects_(salesSheet).filter(function (s) {
+      return String(s.SaleID) === saleId;
+    })[0];
+
+    // กันกดยกเลิกซ้ำ ไม่งั้นสต็อกจะถูกคืนสองรอบ
+    if (sale && sale.Status === 'voided') {
+      return { ok: false, error: 'บิลนี้ถูกยกเลิกไปแล้ว' };
+    }
+
+    var items = sheetToObjects_(getSheet_(SHEET_NAMES.SALE_ITEMS)).filter(function (item) {
+      return String(item.SaleID) === saleId;
+    });
+    if (!items.length) return { ok: false, error: 'ไม่พบรายการสินค้าของบิลนี้' };
+
+    var productsSheet = getSheet_(SHEET_NAMES.PRODUCTS);
+    var headers = productsSheet.getRange(1, 1, 1, productsSheet.getLastColumn()).getValues()[0];
+    var stockColIndex = headers.indexOf('StockQty');
+    var movementsSheet = getSheet_(SHEET_NAMES.STOCK_MOVEMENTS);
+    var now = new Date();
+    var restored = 0;
+
+    items.forEach(function (item) {
+      var sku = String(item.SKU).trim();
+      var qty = Number(item.Qty) || 0;
+      var productRow = findRowIndexByKey_(productsSheet, 'SKU', sku);
+      // สินค้าอาจถูกลบออกจากแคตตาล็อกไปแล้ว — ยังต้องยกเลิกบิลได้ แค่คืนสต็อกตัวนั้นไม่ได้
+      if (productRow !== -1) {
+        var current = Number(productsSheet.getRange(productRow, stockColIndex + 1).getValue()) || 0;
+        updateRowFields_(productsSheet, productRow, { StockQty: current + qty });
+        restored++;
+      }
+      appendObject_(movementsSheet, {
+        Timestamp: now,
+        SKU: sku,
+        ChangeQty: qty,
+        Reason: 'void',
+        RefSaleID: saleId,
+        UserId: payload.userId || ''
+      });
+    });
+
+    updateRowFields_(salesSheet, rowIndex, { Status: 'voided' });
+
+    logActivity_(payload.userId, 'void', saleId + ' คืนสต็อก ' + restored + '/' + items.length + ' รายการ');
+
+    return { ok: true, saleId: saleId, itemsRestored: restored, itemCount: items.length };
+  });
+}
+
+/**
+ * สรุปยอดขายของวันที่ระบุ (YYYY-MM-DD)
+ *
+ * รายงานนี้บอก "กำไร" ไม่ใช่แค่ "ยอดขาย" เพราะยอดขายสูงไม่ได้แปลว่าได้กำไร
+ * ข้อมูลจริงของร้านมีสินค้าที่ขายต่ำกว่าทุนอยู่ ยิ่งขายยิ่งขาดทุน ถ้ารายงานบอกแค่
+ * ยอดขาย ปัญหานี้จะไม่มีวันโผล่ให้เห็น
+ *
+ * ต้นทุนที่ใช้คือ Products.Cost ณ ตอนออกรายงาน (ไม่ได้เก็บต้นทุนไว้ในบิลตอนขาย)
+ * ดังนั้นถ้าต้นทุนเปลี่ยนภายหลัง กำไรย้อนหลังจะขยับตาม — ยอมรับได้สำหรับร้านขนาดนี้
+ * แต่ต้องรู้ไว้ว่าตัวเลขกำไรเป็นค่าประมาณ ไม่ใช่บัญชีต้นทุนที่ตรึงไว้แล้ว
+ */
+function handleReport_(dateStr) {
+  if (!dateStr) return { ok: false, error: 'ต้องระบุ date=YYYY-MM-DD' };
+
+  var sales = sheetToObjects_(getSheet_(SHEET_NAMES.SALES)).filter(function (s) {
+    if (s.Status !== 'completed') return false;
+    var d = new Date(s.Timestamp);
+    return Utilities.formatDate(d, 'Asia/Bangkok', 'yyyy-MM-dd') === dateStr;
+  });
+
+  var totalSales = sales.reduce(function (sum, s) { return sum + Number(s.Total); }, 0);
+  var totalDiscount = sales.reduce(function (sum, s) { return sum + Number(s.Discount); }, 0);
+
+  var saleIds = {};
+  sales.forEach(function (s) { saleIds[s.SaleID] = true; });
+
+  // ต้นทุนต่อ SKU (ว่างได้ ถ้ายังไม่รู้ราคาซัพพลายเออร์)
+  var costBySku = {};
+  var nameBySku = {};
+  sheetToObjects_(getSheet_(SHEET_NAMES.PRODUCTS)).forEach(function (p) {
+    var sku = String(p.SKU).trim();
+    nameBySku[sku] = p.Name;
+    if (p.Cost !== '' && p.Cost !== null && !isNaN(Number(p.Cost))) {
+      costBySku[sku] = Number(p.Cost);
+    }
+  });
+
+  var byProduct = {};
+  var revenueWithKnownCost = 0;
+  var costOfGoodsSold = 0;
+  var unknownCostRevenue = 0;
+
+  sheetToObjects_(getSheet_(SHEET_NAMES.SALE_ITEMS)).forEach(function (item) {
+    if (!saleIds[item.SaleID]) return;
+
+    var sku = String(item.SKU).trim();
+    var qty = Number(item.Qty) || 0;
+    var lineTotal = Number(item.LineTotal) || 0;
+    var unitPrice = Number(item.UnitPrice) || 0;
+
+    if (!byProduct[sku]) {
+      byProduct[sku] = {
+        sku: sku,
+        name: item.ProductName || nameBySku[sku] || sku,
+        qty: 0, revenue: 0, profit: null, soldBelowCost: false
+      };
+    }
+    var entry = byProduct[sku];
+    entry.qty += qty;
+    entry.revenue += lineTotal;
+
+    if (costBySku[sku] !== undefined) {
+      var cost = costBySku[sku];
+      var lineProfit = (unitPrice - cost) * qty;
+      entry.profit = (entry.profit || 0) + lineProfit;
+      if (unitPrice < cost) entry.soldBelowCost = true;
+      revenueWithKnownCost += lineTotal;
+      costOfGoodsSold += cost * qty;
+    } else {
+      unknownCostRevenue += lineTotal;
+    }
+  });
+
+  var products = Object.keys(byProduct).map(function (sku) { return byProduct[sku]; });
+  var topSellers = products.slice().sort(function (a, b) { return b.qty - a.qty; }).slice(0, 10);
+  var losers = products.filter(function (p) { return p.soldBelowCost; });
+
+  var bills = sales.map(function (s) {
+    return {
+      saleId: s.SaleID,
+      time: Utilities.formatDate(new Date(s.Timestamp), 'Asia/Bangkok', 'HH:mm'),
+      customerName: s.CustomerName || '',
+      total: Number(s.Total) || 0,
+      paymentMethod: s.PaymentMethod || ''
+    };
+  }).reverse();   // บิลล่าสุดขึ้นก่อน เพราะบิลที่เพิ่งกดผิดคือบิลที่ต้องแก้บ่อยที่สุด
+
+  return {
+    ok: true,
+    date: dateStr,
+    orderCount: sales.length,
+    totalSales: totalSales,
+    totalDiscount: totalDiscount,
+    bills: bills,
+    // กำไรขั้นต้นนับเฉพาะส่วนที่รู้ต้นทุน จึงต้องรายงานคู่กับสัดส่วนที่ยังไม่รู้เสมอ
+    grossProfit: revenueWithKnownCost - costOfGoodsSold,
+    revenueWithKnownCost: revenueWithKnownCost,
+    unknownCostRevenue: unknownCostRevenue,
+    itemCount: products.reduce(function (sum, p) { return sum + p.qty; }, 0),
+    topSellers: topSellers,
+    soldBelowCost: losers
+  };
+}
+
+/**
+ * สรุปยอดขายช่วงวันที่ (dateFrom ถึง dateTo แบบ YYYY-MM-DD ทั้งคู่) พร้อมยอดรายวัน
+ *
+ * ต่างจาก handleReport_ (รายวันเดียว) ตรงที่ดูเทรนด์หลายวันได้ในคำขอเดียว เช่น
+ * สรุปยอดขายประจำเดือน — คำนวณกำไรด้วยตรรกะเดียวกัน (นับเฉพาะ SKU ที่รู้ต้นทุน
+ * จาก Products.Cost ปัจจุบัน) ยังไม่ได้ต่อเข้าหน้ารายงานในแอป เตรียมไว้ให้ใช้ได้เลย
+ * เมื่อจะทำตัวเลือกช่วงวันที่ในอนาคต
+ */
+function handleReportRange_(dateFromStr, dateToStr) {
+  if (!dateFromStr || !dateToStr) {
+    return { ok: false, error: 'ต้องระบุ dateFrom และ dateTo (YYYY-MM-DD)' };
+  }
+  if (dateFromStr > dateToStr) {
+    return { ok: false, error: 'dateFrom ต้องไม่เกิน dateTo' };
+  }
+
+  var sales = sheetToObjects_(getSheet_(SHEET_NAMES.SALES)).filter(function (s) {
+    if (s.Status !== 'completed') return false;
+    var d = Utilities.formatDate(new Date(s.Timestamp), 'Asia/Bangkok', 'yyyy-MM-dd');
+    return d >= dateFromStr && d <= dateToStr;
+  });
+
+  var saleIds = {};
+  sales.forEach(function (s) { saleIds[s.SaleID] = true; });
+
+  var costBySku = {};
+  sheetToObjects_(getSheet_(SHEET_NAMES.PRODUCTS)).forEach(function (p) {
+    var sku = String(p.SKU).trim();
+    if (p.Cost !== '' && p.Cost !== null && !isNaN(Number(p.Cost))) {
+      costBySku[sku] = Number(p.Cost);
+    }
+  });
+
+  var dailyTotals = {};
+  sales.forEach(function (s) {
+    var d = Utilities.formatDate(new Date(s.Timestamp), 'Asia/Bangkok', 'yyyy-MM-dd');
+    if (!dailyTotals[d]) dailyTotals[d] = { date: d, totalSales: 0, orderCount: 0 };
+    dailyTotals[d].totalSales += Number(s.Total) || 0;
+    dailyTotals[d].orderCount += 1;
+  });
+
+  var revenueWithKnownCost = 0;
+  var costOfGoodsSold = 0;
+  var unknownCostRevenue = 0;
+
+  sheetToObjects_(getSheet_(SHEET_NAMES.SALE_ITEMS)).forEach(function (item) {
+    if (!saleIds[item.SaleID]) return;
+    var sku = String(item.SKU).trim();
+    var qty = Number(item.Qty) || 0;
+    var lineTotal = Number(item.LineTotal) || 0;
+
+    if (costBySku[sku] !== undefined) {
+      revenueWithKnownCost += lineTotal;
+      costOfGoodsSold += costBySku[sku] * qty;
+    } else {
+      unknownCostRevenue += lineTotal;
+    }
+  });
+
+  var totalSales = sales.reduce(function (sum, s) { return sum + (Number(s.Total) || 0); }, 0);
+  var totalDiscount = sales.reduce(function (sum, s) { return sum + (Number(s.Discount) || 0); }, 0);
+
+  var daily = Object.keys(dailyTotals)
+    .map(function (d) { return dailyTotals[d]; })
+    .sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+
+  return {
+    ok: true,
+    dateFrom: dateFromStr,
+    dateTo: dateToStr,
+    orderCount: sales.length,
+    totalSales: totalSales,
+    totalDiscount: totalDiscount,
+    grossProfit: revenueWithKnownCost - costOfGoodsSold,
+    revenueWithKnownCost: revenueWithKnownCost,
+    unknownCostRevenue: unknownCostRevenue,
+    daily: daily
+  };
+}
