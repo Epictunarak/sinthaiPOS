@@ -59,6 +59,18 @@ class FakeSheet {
       },
       getValue() { return this.getValues()[0][0]; },
       setValue(value) { return this.setValues([[value]]); },
+      clearContent() {
+        for (let r = 0; r < numRows; r++) {
+          const target = sheet.rows[row - 1 + r];
+          if (!target) continue;
+          for (let c = 0; c < numCols; c++) target[col - 1 + c] = '';
+        }
+        // แถวที่ถูกล้างจนว่างหมดต้องหายไปจริง ไม่ใช่เหลือแถวว่างค้างไว้
+        while (sheet.rows.length && sheet.rows[sheet.rows.length - 1].every((v) => v === '')) {
+          sheet.rows.pop();
+        }
+        return this;
+      },
       setNumberFormat(format) {
         sheet.numberFormats[`${row},${col},${numRows},${numCols}`] = format;
         return this;
@@ -97,13 +109,34 @@ class FakeSpreadsheet {
 export function loadAppsScript(fileNames, { sheets = {}, scriptProperties = {} } = {}) {
   const spreadsheet = new FakeSpreadsheet(sheets);
   const logs = [];
+  const alerts = [];
+  const menus = [];
   const properties = { ...scriptProperties };
 
   const context = {
     spreadsheet,
     logs,
+    alerts,
+    menus,
     properties,
-    SpreadsheetApp: { getActiveSpreadsheet: () => spreadsheet },
+    SpreadsheetApp: {
+      getActiveSpreadsheet: () => spreadsheet,
+      // เก็บกล่องข้อความและเมนูที่โค้ดสร้างไว้ให้เทสต์ตรวจได้ ของจริงเป็น UI ที่อ่านค่าไม่ได้
+      getUi: () => ({
+        alert: (...args) => { alerts.push(args.length === 1 ? args[0] : args.slice(0, 2).join('\n')); },
+        ButtonSet: { OK: 'OK' },
+        createMenu: (name) => {
+          const menu = { name, items: [] };
+          menus.push(menu);
+          const builder = {
+            addItem: (caption, fn) => { menu.items.push({ caption, fn }); return builder; },
+            addSeparator: () => { menu.items.push({ separator: true }); return builder; },
+            addToUi: () => menu
+          };
+          return builder;
+        }
+      })
+    },
     PropertiesService: {
       getScriptProperties: () => ({
         getProperty: (key) => (key in properties ? properties[key] : null),
