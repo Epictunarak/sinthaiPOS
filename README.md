@@ -75,6 +75,9 @@ psql -U postgres -d sinthai \
 # ทดสอบตัวแปลงข้อมูลจากชีต (บาร์โค้ด, รหัส SKU, จำนวนต่อแพ็ค)
 python3 tests/test_import_from_sheet.py
 
+# ทดสอบว่าการสร้างแผ่น Products ใหม่ไม่ล้างสต็อกที่นับไว้แล้ว
+python3 tests/test_build_catalog.py
+
 # ทดสอบตรรกะฝั่งแอป
 cd web && npm test
 

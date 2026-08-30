@@ -33,10 +33,48 @@ COMPETITOR_UNDERCUT = 0.98
 # ต่ำกว่านี้ถือว่ากำไรบางจนน่ากังวล
 THIN_MARGIN_PCT = 0.05
 
+# ค่าเริ่มต้นสำหรับสินค้าที่ยังไม่เคยมีในแผ่น Products (ติดตั้งครั้งแรก/สินค้าใหม่)
+DEFAULT_STOCK_QTY = 0        # ต้องตรวจนับของจริงก่อนเปิดใช้
+DEFAULT_REORDER_POINT = 3
+
 
 def read_csv(path):
     with open(path, encoding="utf-8-sig", newline="") as f:
         return list(csv.DictReader(f))
+
+
+def read_live_stock():
+    """อ่านยอดคงเหลือจริงที่ export มาจากแผ่น Products ในชีตที่ POS ใช้อยู่
+
+    ทำไมต้องมี: แผ่น Products ถูกสร้างใหม่จากไฟล์นี้ทุกครั้ง แต่ StockQty เป็นค่าที่
+    "ระบบเขียน" ระหว่างใช้งานจริง (ขาย/ตรวจนับ/รับของ) ไม่ใช่ค่าที่มาจากชีตต้นทาง
+    ถ้าเขียน 0 ทับทุกรอบ สต็อกที่เดินนับทั้งร้านจะหายทันทีที่วาง CSV ทับรอบถัดไป
+    — แนวคิดเดียวกับ barcode_captures.csv ที่กันบาร์โค้ดหายตอน import
+
+    วิธีใช้: ในชีต POS เลือกแผ่น Products > ไฟล์ > ดาวน์โหลด > CSV แล้วบันทึกทับไฟล์นี้
+    ถ้ายังไม่มีไฟล์ (ติดตั้งครั้งแรก) จะถือว่าสต็อกเริ่มต้นเป็น 0 ตามเดิม
+    """
+    path = DATA / "stock_levels.csv"
+    if not path.exists():
+        return {}
+
+    levels = {}
+    for row in read_csv(path):
+        sku = (row.get("SKU") or "").strip()
+        if not sku:
+            continue
+        qty = to_float(row.get("StockQty"))
+        reorder = to_float(row.get("ReorderPoint"))
+        levels[sku] = {
+            "stock_qty": DEFAULT_STOCK_QTY if qty is None else qty,
+            "reorder_point": DEFAULT_REORDER_POINT if reorder is None else reorder,
+        }
+    return levels
+
+
+def format_qty(value):
+    """เลขจำนวนเต็มให้แสดงเป็นจำนวนเต็ม ไม่ใช่ 12.0 — สินค้าชั่งกิโลอาจมีทศนิยมได้"""
+    return str(int(value)) if float(value).is_integer() else str(value)
 
 
 def to_float(value):
@@ -212,12 +250,14 @@ def write_outputs(catalog):
     # แผ่น Products สำหรับ Google Sheet — "สร้างจาก" ข้อมูลต้นทาง ไม่ใช่พิมพ์มือ
     # เพื่อไม่ให้เกิดฐานข้อมูลหลักสองชุดที่ค่อยๆ เพี้ยนออกจากกัน
     sheet = BUILD / "sheet_products.csv"
+    live_stock = read_live_stock()
     with open(sheet, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
         w.writerow(["SKU", "Barcode", "Name", "Category", "Unit", "Cost",
                     "RetailPrice", "WholesalePrice", "WholesaleMinQty",
                     "StockQty", "ReorderPoint", "Active"])
         for c in catalog:
+            live = live_stock.get(c["sku_code"], {})
             w.writerow([
                 c["sku_code"], c["barcode"], c["product_name"], c["category"],
                 # หน่วยที่ "ขาย" ไม่ใช่หน่วยของขนาดบรรจุ — สินค้าที่ขายยกแพ็คนับเป็นแพ็ค
@@ -227,11 +267,20 @@ def write_outputs(catalog):
                 "" if c["retail_price"] is None else f'{c["retail_price"]:.2f}',
                 "" if c["suggested_wholesale_price"] is None else c["suggested_wholesale_price"],
                 5,
-                0,   # ยอดคงเหลือเริ่มต้น — ต้องตรวจนับของจริงก่อนเปิดใช้
-                3,   # จุดสั่งซื้อเริ่มต้น
+                # ยอดคงเหลือและจุดสั่งซื้อเป็นค่าที่ระบบเขียนระหว่างใช้งานจริง ไม่ใช่ค่าจากชีตต้นทาง
+                # จึงต้องเอาของเดิมกลับมาใส่ ไม่ใช่เขียนทับด้วย 0 (ดู read_live_stock)
+                format_qty(live.get("stock_qty", DEFAULT_STOCK_QTY)),
+                format_qty(live.get("reorder_point", DEFAULT_REORDER_POINT)),
                 "TRUE",
             ])
     print(f"เขียนแล้ว: {sheet.relative_to(ROOT)}  (วางทับแผ่น Products ใน Google Sheet)")
+    if live_stock:
+        kept = sum(1 for c in catalog if c["sku_code"] in live_stock)
+        print(f"  คงยอดสต็อกเดิมไว้ {kept} รายการ จาก data/stock_levels.csv")
+    else:
+        print("  ยังไม่มี data/stock_levels.csv — สต็อกทุกรายการเป็น 0")
+        print("  (หลังตรวจนับแล้ว ให้ export แผ่น Products เป็น CSV มาไว้ที่ไฟล์นั้น")
+        print("   ไม่งั้นการวาง CSV ทับรอบถัดไปจะล้างสต็อกที่นับไว้ทั้งหมด)")
 
 
 def main():

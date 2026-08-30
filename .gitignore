@@ -13,3 +13,6 @@ apps-script/.clasp.json
 build/
 __pycache__/
 *.pyc
+
+# ยอดคงเหลือที่ export มาจากแผ่น Products (มีข้อมูลจริงของร้าน ไม่ต้องเก็บใน git)
+data/stock_levels.csv

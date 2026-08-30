@@ -16,6 +16,8 @@
 | `source/sinthai_sheet_snapshot.xlsx` | ดาวน์โหลดจาก Google Sheet | ไม่ — ให้ดาวน์โหลดใหม่ทับ |
 | `products_master.csv` | `scripts/import_from_sheet.py` | **ไม่ — จะถูกเขียนทับ** |
 | `vendor_prices.csv` | `scripts/import_from_sheet.py` | **ไม่ — จะถูกเขียนทับ** |
+| `barcode_captures.csv` | export จากชีต `BarcodeCaptures` | ได้ — เป็นข้อมูลขาเข้า |
+| `stock_levels.csv` | export จากแผ่น `Products` ในชีต POS | ได้ — เป็นข้อมูลขาเข้า |
 
 **แก้ข้อมูลสินค้าและราคาที่ Google Sheet เท่านั้น** แล้วนำเข้าใหม่ ไฟล์ CSV สองไฟล์นี้เป็น
 ผลลัพธ์ที่ถูกสร้างใหม่ทุกครั้ง (commit ไว้ใน git เพื่อให้เห็น diff ว่าข้อมูลเปลี่ยนอะไรบ้าง
@@ -38,6 +40,25 @@ python3 scripts/build_catalog.py --write
 
 # 5. นำเข้าฐานข้อมูล PostgreSQL (ดู ../README.md)
 ```
+
+## ⚠️ ก่อนวาง CSV ทับแผ่น Products ครั้งที่สองเป็นต้นไป
+
+`build/sheet_products.csv` มีคอลัมน์ `StockQty` และ `ReorderPoint` อยู่ด้วย ซึ่งเป็นค่าที่
+**ระบบเขียนระหว่างใช้งานจริง** (ขาย / ตรวจนับ / รับของ) ไม่ใช่ค่าที่มาจากชีตต้นทาง
+
+ถ้าวาง CSV ทับโดยไม่ทำขั้นตอนนี้ก่อน **สต็อกที่เดินนับทั้งร้านจะกลายเป็น 0 ทันที**
+
+**ทำแบบนี้ก่อนทุกครั้ง:**
+
+1. เปิดชีต POS → แผ่น `Products` → **ไฟล์ > ดาวน์โหลด > CSV**
+2. บันทึกทับเป็น `data/stock_levels.csv`
+3. รัน `python3 scripts/build_catalog.py --write` (จะขึ้นว่า "คงยอดสต็อกเดิมไว้ N รายการ")
+4. ค่อยวาง `build/sheet_products.csv` ทับแผ่น Products
+
+สินค้าใหม่ที่ยังไม่เคยอยู่ในแผ่น Products จะได้ `StockQty = 0` ตามเดิม (ต้องตรวจนับก่อนขาย)
+
+> ถ้าไม่มีไฟล์ `data/stock_levels.csv` สคริปต์จะเตือนให้เห็นชัดว่าสต็อกจะถูกตั้งเป็น 0 ทั้งหมด
+> — ดูตัวอย่างหัวคอลัมน์ที่ `stock_levels.csv.example`
 
 ## สิ่งที่ **ไม่** ถูกเก็บใน CSV โดยตั้งใจ
 
